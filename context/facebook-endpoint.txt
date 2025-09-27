@@ -1,0 +1,570 @@
+Got you, Edwin. Yes—you can grab a Page’s **name**, **numeric page ID**, and a **direct profile-photo URL** from a normal Facebook Page URL. The cleanest way is to hit the Graph API with a minimal token and the right fields.
+
+Below is a step-by-step + copy-paste JS and PHP you can drop onto SiteGround.
+
+---
+
+# Step 1) Decide your token strategy
+
+For **public Page metadata** (like `id`, `name`, `link`, `picture`) a **generic access token** is sufficient—no need to act “as the Page” or request Page-level permissions. A full Page access token is only required for fields/edges that include user info or private content. ([Facebook for Developers][1])
+
+You have two practical options:
+
+**A. App Access Token (recommended for server-side, read-only)**
+
+* Create an app at **developers.facebook.com** → get **App ID** and **App Secret**.
+* Exchange for an **app token** (server-side only; never expose the secret):
+
+  ```
+  GET https://graph.facebook.com/oauth/access_token
+      ?client_id={APP_ID}
+      &client_secret={APP_SECRET}
+      &grant_type=client_credentials
+  ```
+
+  Response gives `access_token`. ([Facebook for Developers][2], [Permadi][3])
+
+**B. Short-term User Token (fast to test)**
+
+* Use the **Graph API Explorer** to generate a user token and test calls. (Good for dev, not production.) ([Facebook for Developers][2])
+
+> You do **not** need a Page access token just to read `id`, `name`, and `picture`. ([Facebook for Developers][1])
+
+---
+
+# Step 2) Parse the Page URL to a resolvable identifier
+
+Accept input like any of these:
+
+* `https://www.facebook.com/cubecarpentry`
+* `https://facebook.com/cubecarpentry/`
+* `https://facebook.com/profile.php?id=243539255982420`
+* `https://facebook.com/pages/Some-Name/243539255982420`
+
+Rules:
+
+* If the URL contains `profile.php?id=NNN`, use that **numeric ID**.
+* Else, take the first path segment (`cubecarpentry`) as the **username**.
+* Else, if it’s the “/pages/…/{id}” format, pull the **last numeric** segment.
+
+Either **username** or **numeric ID** works with the Graph API.
+
+---
+
+# Step 3) Call Graph API with just the fields you need
+
+Use the versioned endpoint (example uses v19.0). Ask for:
+
+* `id` (numeric page id)
+* `name` (Page display name)
+* `link` (canonical URL to the Page)
+* `picture` (request a large URL in JSON, not a redirect)
+
+There are two equivalent ways to get the picture:
+
+1. **Inline field expansion**
+
+```
+GET /v19.0/{page-identifier}
+    ?fields=id,name,link,picture.type(large){url}
+```
+
+2. **Dedicated picture edge (returns JSON if redirect=false)**
+
+```
+GET /v19.0/{page-identifier}/picture?type=large&redirect=false
+```
+
+For the picture edge, `redirect=false` returns a JSON payload with a durable URL for display (note: URLs can expire; don’t cache forever). ([Facebook for Developers][4])
+
+---
+
+# Step 4) Normalize your response
+
+Map Graph’s response to your desired shape:
+
+```json
+{
+  "success": true,
+  "data": {
+    "pageid": "243539255982420",
+    "name": "Cube Carpentry",
+    "picture": "https://lookaside.facebook.com/platform/profilepic/?....",
+    "url": "https://www.facebook.com/cubecarpentry/",
+    "method": "url_parsing"
+  }
+}
+```
+
+---
+
+# JavaScript (Node/Browser fetch) example
+
+> Keep the token on the **server**. If you must call from the browser during dev, proxy the request.
+
+```js
+// utils/fbPageLookup.js
+export async function getFacebookPageBasics(pageUrl, accessToken) {
+  const parsed = new URL(pageUrl);
+  const pathname = parsed.pathname.replace(/\/+$/, ""); // trim trailing slash
+  const qs = parsed.searchParams;
+
+  // 1) derive identifier
+  let identifier = null;
+
+  // profile.php?id=NNN
+  if (parsed.pathname.includes("/profile.php") && qs.get("id")) {
+    identifier = qs.get("id");
+  } else {
+    // /pages/.../NUMERIC_ID
+    const parts = pathname.split("/").filter(Boolean);
+    const last = parts[parts.length - 1];
+    if (/^\d+$/.test(last)) {
+      identifier = last;
+    } else {
+      // vanilla vanity: /{username}
+      identifier = parts[0];
+    }
+  }
+
+  // 2) fetch fields in one shot
+  const graphBase = "https://graph.facebook.com/v19.0";
+  const fields = "id,name,link,picture.type(large){url}";
+  const url = `${graphBase}/${encodeURIComponent(identifier)}?fields=${encodeURIComponent(fields)}&access_token=${encodeURIComponent(accessToken)}`;
+
+  const res = await fetch(url);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    return { success: false, error: err.error?.message || `HTTP ${res.status}` };
+  }
+  const data = await res.json();
+
+  return {
+    success: true,
+    data: {
+      pageid: String(data.id),
+      name: data.name,
+      picture: data.picture?.data?.url || "",
+      url: data.link || pageUrl,
+      method: "url_parsing"
+    }
+  };
+}
+```
+
+---
+
+# PHP (cURL) example for SiteGround
+
+```php
+<?php
+// fb_page_lookup.php
+function get_facebook_page_basics(string $pageUrl, string $accessToken): array {
+    $parts = parse_url($pageUrl);
+    $path  = isset($parts['path']) ? rtrim($parts['path'], "/") : "";
+    parse_str($parts['query'] ?? "", $query);
+
+    // 1) derive identifier
+    if (strpos($path, "/profile.php") !== false && !empty($query['id'])) {
+        $identifier = $query['id'];
+    } else {
+        $segments = array_values(array_filter(explode("/", $path)));
+        $last = end($segments);
+        if ($last !== false && preg_match('/^\d+$/', $last)) {
+            $identifier = $last; // numeric id at end
+        } else {
+            $identifier = $segments[0] ?? ""; // username
+        }
+    }
+
+    if ($identifier === "") {
+        return [ "success" => false, "error" => "Unable to parse Page identifier from URL." ];
+    }
+
+    // 2) call Graph API
+    $graphBase = "https://graph.facebook.com/v19.0";
+    $fields = "id,name,link,picture.type(large){url}";
+    $endpoint = sprintf(
+        "%s/%s?fields=%s&access_token=%s",
+        $graphBase,
+        rawurlencode($identifier),
+        rawurlencode($fields),
+        rawurlencode($accessToken)
+    );
+
+    $ch = curl_init($endpoint);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 15,
+    ]);
+    $resp = curl_exec($ch);
+    if ($resp === false) {
+        $err = curl_error($ch);
+        curl_close($ch);
+        return [ "success" => false, "error" => $err ];
+    }
+    $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    $json = json_decode($resp, true);
+    if ($status >= 400 || isset($json['error'])) {
+        return [ "success" => false, "error" => $json['error']['message'] ?? ("HTTP ".$status) ];
+    }
+
+    return [
+        "success" => true,
+        "data" => [
+            "pageid"  => strval($json['id'] ?? ''),
+            "name"    => $json['name'] ?? '',
+            "picture" => $json['picture']['data']['url'] ?? '',
+            "url"     => $json['link'] ?? $pageUrl,
+            "method"  => "url_parsing"
+        ]
+    ];
+}
+
+// Example usage:
+$token = getenv('FB_APP_TOKEN'); // put your token in an env var
+$inputUrl = $_GET['page'] ?? 'https://www.facebook.com/cubecarpentry';
+header('Content-Type: application/json');
+echo json_encode(get_facebook_page_basics($inputUrl, $token));
+```
+
+---
+
+# Notes & gotchas
+
+* **Use API versions** in your paths (e.g., `/v19.0/…`) to avoid surprise behavior changes. ([Bryan Guner][5])
+* **Picture URLs expire.** Always be ready to refresh; don’t hard-cache the final image URL for long periods. You can request JSON with `redirect=false` and grab `data.url`. ([Facebook for Developers][6])
+* **Security:** Never ship your **App Secret** to the browser—keep token exchange on the server.
+* **When would you need a Page access token?** For insights, posts, admins, or fields that may include user info/private content. Basic `id`, `name`, `link`, `picture` are fine with a generic token. ([Facebook for Developers][1])
+* **Where to start if new to Pages API:** Meta’s Pages API “Getting Started” and the Graph API overview. ([Facebook for Developers][7])
+
+Awesome — here’s a drop-in, SiteGround-friendly mini “Page lookup” you can use right away.
+
+I’m giving you:
+
+1. `/api/fb-page-lookup.php` — the secure PHP endpoint
+2. `/index.html` — a tiny front-end form that calls the endpoint and shows your JSON
+3. Quick setup notes (SiteGround paths, token options)
+
+---
+
+# 1) `/api/fb-page-lookup.php`
+
+```php
+<?php
+/**
+ * /api/fb-page-lookup.php
+ * Returns: { success, data|error }
+ * Input:   GET ?page=<facebook page url>
+ */
+
+declare(strict_types=1);
+
+// --------- CONFIG ---------
+const FB_GRAPH_VERSION = 'v19.0';
+
+// Option A (recommended): App ID + Secret (server-side only)
+const FB_APP_ID     = 'YOUR_APP_ID';
+const FB_APP_SECRET = 'YOUR_APP_SECRET';
+
+// Option B: If you prefer to hard-set an app access token directly, put it here.
+// (Leave empty to auto-generate via client_credentials using APP_ID/SECRET above.)
+const FB_APP_TOKEN_OVERRIDE = ''; // e.g. '123|abc...'
+
+// CORS (same-origin is safest). If you must call cross-origin, uncomment:
+// header('Access-Control-Allow-Origin: https://yourdomain.com');
+// header('Vary: Origin');
+
+// --------- UTILITIES ---------
+function json_out($arr, int $code = 200): void {
+    header('Content-Type: application/json; charset=utf-8');
+    http_response_code($code);
+    echo json_encode($arr, JSON_UNESCAPED_SLASHES);
+    exit;
+}
+
+function get_input_url(): string {
+    $pageUrl = $_GET['page'] ?? '';
+    $pageUrl = trim($pageUrl);
+    if ($pageUrl === '' || !preg_match('#^https?://#i', $pageUrl)) {
+        json_out([ 'success' => false, 'error' => 'Provide ?page=https://www.facebook.com/...'], 400);
+    }
+    return $pageUrl;
+}
+
+function derive_identifier(string $pageUrl): string {
+    $parts = parse_url($pageUrl);
+    if (!$parts || empty($parts['host'])) return '';
+
+    // Normalize host (accept facebook.com, www.facebook.com, m.facebook.com)
+    if (!preg_match('/(^|\.)facebook\.com$/i', $parts['host'])) {
+        return ''; // not a facebook.com URL
+    }
+
+    $path  = rtrim($parts['path'] ?? '', '/');
+    parse_str($parts['query'] ?? '', $query);
+
+    // /profile.php?id=NNN
+    if (strpos($path, '/profile.php') !== false && !empty($query['id'])) {
+        return (string)$query['id'];
+    }
+
+    // /pages/.../NUMERIC_ID
+    $segments = array_values(array_filter(explode('/', $path)));
+    if ($segments) {
+        $last = end($segments);
+        if ($last !== false && preg_match('/^\d+$/', $last)) {
+            return $last;
+        }
+        // vanilla vanity: /{username}
+        return $segments[0];
+    }
+
+    return '';
+}
+
+function http_get_json(string $url): array {
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 20,
+        CURLOPT_FOLLOWLOCATION => false,
+        CURLOPT_HTTPHEADER => ['Accept: application/json']
+    ]);
+    $resp = curl_exec($ch);
+    if ($resp === false) {
+        $err = curl_error($ch);
+        curl_close($ch);
+        return ['__http_error' => $err];
+    }
+    $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    $json = json_decode($resp, true);
+    if (!is_array($json)) {
+        return ['__http_status' => $status, '__raw' => $resp];
+    }
+    $json['__http_status'] = $status;
+    return $json;
+}
+
+function get_app_access_token(): string {
+    // 1) If override provided, use it
+    if (FB_APP_TOKEN_OVERRIDE !== '') return FB_APP_TOKEN_OVERRIDE;
+
+    // 2) ENV (optional): setenv('FB_APP_TOKEN', '...') in .htaccess or Site Tools
+    $env = getenv('FB_APP_TOKEN');
+    if ($env) return $env;
+
+    // 3) Generate via client_credentials
+    if (FB_APP_ID === 'YOUR_APP_ID' || FB_APP_SECRET === 'YOUR_APP_SECRET') {
+        // Developer forgot to set values
+        return '';
+    }
+
+    $oauth = sprintf(
+        'https://graph.facebook.com/oauth/access_token?client_id=%s&client_secret=%s&grant_type=client_credentials',
+        rawurlencode(FB_APP_ID),
+        rawurlencode(FB_APP_SECRET)
+    );
+    $json = http_get_json($oauth);
+    if (!empty($json['access_token'])) {
+        return $json['access_token'];
+    }
+    return '';
+}
+
+// --------- MAIN ---------
+$pageUrl = get_input_url();
+$identifier = derive_identifier($pageUrl);
+
+if ($identifier === '') {
+    json_out([ 'success' => false, 'error' => 'Unable to parse a Page identifier from the provided URL.' ], 400);
+}
+
+$token = get_app_access_token();
+if ($token === '') {
+    json_out([ 'success' => false, 'error' => 'No app access token available. Configure APP_ID/SECRET or FB_APP_TOKEN.' ], 500);
+}
+
+// Build Graph request
+$fields = 'id,name,link,picture.type(large){url}';
+$graph = sprintf(
+    'https://graph.facebook.com/%s/%s?fields=%s&access_token=%s',
+    FB_GRAPH_VERSION,
+    rawurlencode($identifier),
+    rawurlencode($fields),
+    rawurlencode($token)
+);
+
+$res = http_get_json($graph);
+
+// HTTP / API error handling
+if (!empty($res['error']) || ($res['__http_status'] ?? 200) >= 400) {
+    $msg = $res['error']['message'] ?? ('Graph call failed (HTTP '.($res['__http_status'] ?? '??').')');
+    json_out([ 'success' => false, 'error' => $msg ], 502);
+}
+
+$out = [
+    'success' => true,
+    'data' => [
+        'pageid' => isset($res['id']) ? (string)$res['id'] : '',
+        'name'   => $res['name'] ?? '',
+        'picture'=> $res['picture']['data']['url'] ?? '',
+        'url'    => $res['link'] ?? $pageUrl,
+        'method' => 'url_parsing'
+    ]
+];
+
+json_out($out, 200);
+```
+
+---
+
+# 2) `/index.html` (front-end test page)
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FB Page Lookup Demo</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 2rem; }
+    form { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    input[type="url"] { flex: 1 1 420px; padding: .6rem .8rem; }
+    button { padding: .6rem 1rem; cursor: pointer; }
+    pre { background: #f6f7f8; padding: 1rem; border-radius: 8px; overflow: auto; }
+    .row { display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap; }
+    .card { border: 1px solid #e6e6e6; padding: 1rem; border-radius: 10px; min-width: 320px; }
+    img { max-width: 160px; height: auto; border-radius: 6px; display: block; }
+  </style>
+</head>
+<body>
+  <h1>Facebook Page Lookup</h1>
+  <p>Enter a Facebook Page URL (e.g., https://www.facebook.com/cubecarpentry)</p>
+  <form id="lookupForm">
+    <input type="url" id="pageInput" placeholder="https://www.facebook.com/..." required />
+    <button type="submit">Lookup</button>
+  </form>
+
+  <div class="row">
+    <div class="card">
+      <h3>Result (JSON)</h3>
+      <pre id="jsonBox">{}</pre>
+    </div>
+    <div class="card">
+      <h3>Preview</h3>
+      <div id="preview"></div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('lookupForm');
+    const input = document.getElementById('pageInput');
+    const jsonBox = document.getElementById('jsonBox');
+    const preview = document.getElementById('preview');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      jsonBox.textContent = 'Loading...';
+      preview.innerHTML = '';
+
+      try {
+        const url = `/api/fb-page-lookup.php?page=${encodeURIComponent(input.value.trim())}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        jsonBox.textContent = JSON.stringify(data, null, 2);
+
+        if (data?.success && data?.data) {
+          const d = data.data;
+          const a = document.createElement('a');
+          a.href = d.url || '#';
+          a.target = '_blank';
+          a.rel = 'noopener';
+          a.textContent = `${d.name || '(no name)'} — ${d.pageid || ''}`;
+
+          const img = document.createElement('img');
+          img.src = d.picture || '';
+          img.alt = d.name || 'Page image';
+
+          preview.appendChild(a);
+          preview.appendChild(img);
+        }
+      } catch (err) {
+        jsonBox.textContent = JSON.stringify({ success: false, error: String(err) }, null, 2);
+      }
+    });
+  </script>
+</body>
+</html>
+```
+
+---
+
+# 3) Setup (SiteGround)
+
+1. **Create folders**
+
+   * At your site root, create `/api/`
+   * Put `fb-page-lookup.php` inside `/api/`
+   * Put `index.html` at the web root (or in a test folder)
+
+2. **Configure credentials**
+
+   * Go to **developers.facebook.com** → Create App → Get **App ID** and **App Secret**.
+
+   * Open `/api/fb-page-lookup.php` and set:
+
+     ```php
+     const FB_APP_ID     = 'YOUR_APP_ID';
+     const FB_APP_SECRET = 'YOUR_APP_SECRET';
+     ```
+
+     (or set `FB_APP_TOKEN_OVERRIDE` to a known app access token if you prefer.)
+
+   * Optionally, set an environment variable instead of editing code:
+
+     * In SiteGround → **Site Tools** → **Dev** → **PHP Variables** (or via `.htaccess`) add:
+
+       ```
+       SetEnv FB_APP_TOKEN your_app_access_token_here
+       ```
+
+       Then leave `FB_APP_ID/SECRET` as-is and the script will read `FB_APP_TOKEN`.
+
+3. **Test**
+
+   * Visit: `https://yourdomain.com/index.html`
+   * Try: `https://www.facebook.com/cubecarpentry`
+
+You should get a response in the exact shape you requested, e.g.:
+
+```json
+{
+  "success": true,
+  "data": {
+    "pageid": "243539255982420",
+    "name": "Cube Carpentry",
+    "picture": "https://lookaside.facebook.com/platform/profilepic/...",
+    "url": "https://www.facebook.com/cubecarpentry/",
+    "method": "url_parsing"
+  }
+}
+```
+
+---
+
+## Notes & best practices
+
+* **Keep tokens server-side only.** Never expose `APP_SECRET` or app tokens in client JS.
+* **Use versioned Graph paths** (`/v19.0/…`) to avoid breaking changes.
+* **Picture URLs can expire.** If you store them, be ready to refresh by calling the endpoint again.
+* **Input validation.** The endpoint already limits to `facebook.com` hosts and safely parses identifiers.
+
+
+

@@ -1,0 +1,165 @@
+
+<div class="xh8yej3" id="new_video_format_option_tip"><div aria-busy="false" aria-controls="js_k0m" aria-expanded="true" aria-haspopup="menu" class="x1i10hfl xjqpnuy xc5r6h4 xqeqjp1 x1phubyo x972fbf x10w94by x1qhh985 x14e42zd x9f619 x1ypdohk x3ct3a4 xdj266r x14z9mp xat24cr x1lziwak x2lwn1j xeuugli x16tdsg8 xggy1nq x1ja2u2z x1t137rt x6s0dn4 x1ejq31n x18oe1m7 x1sy0etr xstzfhl x3nfvp2 xdl72j9 x1q0g3np x2lah0s x1n2onr6 x1hl2dhg x87ps6o xxymvpz xlh3980 xvmahel x1lku1pv x13dflua x16e9yqp x12w9bfk x15406qy x1i5p2am x1whfx0g xr2y4jy x1ihp6rs xo1l8bm x108nfp6 x1e4gqcv x1y1aw1k xwib8y2 x1g0dm76 xpdmqnj x65f84u xh8yej3" role="button" tabindex="0" id="js_k38"><span class="x8t9es0 x1fvot60 xxio538 x1heor9g xq9mrsl x1h4wwuj x1pd3egz xeuugli xh8yej3"><div class="x78zum5"><div class="x6s0dn4 x78zum5 x1q0g3np xozqiw3 x2lwn1j xeuugli x1iyjqo2 x8va1my x1hc1fzr x13dflua x6o7n8i xxziih7 x12w9bfk x1nhvcw1 xh8yej3"><div class="x3nfvp2 x120ccyz x1heor9g x2lah0s x1c4vz4f" role="presentation"><div class="xtwfq29" style="width: 16px; height: 16px; mask-image: url(&quot;https://static.xx.fbcdn.net/rsrc.php/v4/yA/r/66SW39fHNmr.png&quot;); mask-size: 249px 1381px; mask-position: -51px -1364px;"></div></div><div class="x8t9es0 x1fvot60 xxio538 x1heor9g xuxw1ft x6ikm8r x10wlt62 xlyipyv x1h4wwuj x1pd3egz xeuugli x1iyjqo2">Mobile Feed</div><div class="x3nfvp2 x120ccyz x1heor9g x2lah0s x1c4vz4f xvc5jky" role="presentation"><div class="xtwfq29" style="width: 16px; height: 16px; mask-image: url(&quot;https://static.xx.fbcdn.net/rsrc.php/v4/yT/r/XOvOI4QDugg.png&quot;); mask-size: 25px 664px; mask-position: 0px -582px;"></div></div></div></div></span></div></div>
+
+._61ve a, ._61ve a[role=button], ._61ve button, ._61ve dd, ._61ve div, ._61ve dt, ._61ve em, ._61ve h1, ._61ve h2, ._61ve h3, ._61ve h4, ._61ve h5, ._61ve h6, ._61ve input, ._61ve label, ._61ve li, ._61ve link, ._61ve meta, ._61ve p, ._61ve small, ._61ve span, ._61ve table, ._61ve td, ._61ve textarea, ._61ve th, ._61ve tr {
+    font-family: inherit;
+}
+
+.xh8yej3 {
+    width: 100%;
+}
+
+._61ve a, ._61ve a[role=button], ._61ve button, ._61ve dd, ._61ve div, ._61ve dt, ._61ve em, ._61ve h1, ._61ve h2, ._61ve h3, ._61ve h4, ._61ve h5, ._61ve h6, ._61ve input, ._61ve label, ._61ve li, ._61ve link, ._61ve meta, ._61ve p, ._61ve small, ._61ve span, ._61ve table, ._61ve td, ._61ve textarea, ._61ve th, ._61ve tr {
+    font-family: inherit;
+}
+
+.xh8yej3 {
+    width: 100%;
+}
+
+.x78zum5 {
+    display: flex;
+}
+
+element.style {
+    width: 16px;
+    height: 16px;
+    mask-image: url(https://static.xx.fbcdn.net/rsrc.php/v4/yT/r/XOvOI4QDugg.png);
+    mask-size: 25px 664px;
+    mask-position: 0px -582px;
+}
+
+element.style {
+    width: 16px;
+    height: 16px;
+    mask-image: url(https://static.xx.fbcdn.net/rsrc.php/v4/yA/r/66SW39fHNmr.png);
+    mask-size: 249px 1381px;
+    mask-position: -51px -1364px;
+}
+._61ve a, ._61ve a[role=button], ._61ve button, ._61ve dd, ._61ve div, ._61ve dt, ._61ve em, ._61ve h1, ._61ve h2, ._61ve h3, ._61ve h4, ._61ve h5, ._61ve h6, ._61ve input, ._61ve label, ._61ve li, ._61ve link, ._61ve meta, ._61ve p, ._61ve small, ._61ve span, ._61ve table, ._61ve td, ._61ve textarea, ._61ve th, ._61ve tr {
+    font-family: inherit;
+}
+.xtwfq29 {
+    background-color: currentColor;
+}
+.xtwfq29 {
+    background-color: currentColor;
+}
+user agent stylesheet
+div {
+    display: block;
+    unicode-bidi: isolate;
+}
+
+<div class="x1iorvi4 x11lfxj5 xjkvuk6 x135b78x x9f619" id="js_k0m" style="max-height: 350px; min-width: 500px;"><div><div class="x78zum5 x3ct3a4 xdj266r x14z9mp xat24cr x1lziwak xexx8yu xyri2b x18d9i69 x1c1uobl xdt5ytf xdm93yi" role="menu"><div><div><div aria-labelledby="js_kv5" class="x1i10hfl x1qjc9v5 xjbqb8w xjqpnuy xc5r6h4 xqeqjp1 x1phubyo x13fuv20 x18b5jzi x1q0q8m5 x1t7ytsu x972fbf x10w94by x1qhh985 x14e42zd x9f619 x1ypdohk x78zum5 xdl72j9 xdt5ytf x2lah0s x3ct3a4 xdj266r x14z9mp xat24cr x1lziwak x2lwn1j xeuugli xexx8yu xyri2b x18d9i69 x1c1uobl x1n2onr6 x16tdsg8 x1hl2dhg xggy1nq x1ja2u2z x1t137rt" role="menuitem" tabindex="0"><div class="x78zum5 x1iyjqo2"><div class="x6s0dn4 x78zum5 x1q0g3np xozqiw3 x2lwn1j xeuugli x1iyjqo2 x8va1my x1i5p2am x1whfx0g xr2y4jy x1ihp6rs x1y1aw1k xwib8y2 xmzvs34 xf159sx xo1l8bm x108nfp6 x1v911su"><div class="x6s0dn4 x3nfvp2 x1q0g3np xozqiw3 x2lwn1j xeuugli x1c4vz4f x8va1my x2lah0s xamitd3"><div class="x3nfvp2 x2lah0s"><i alt="" data-visualcompletion="css-img" class="img sp_5qrb4nm05TS_2x sx_46c0bb"></i></div></div><div class="x1iyjqo2 xamitd3" data-sscoverage-ignore="true"><div class="x6s0dn4 x1q0g3np xozqiw3 x2lwn1j x1iyjqo2 xs83m0k x1xsc7gk x78zum5 xeuugli"><div class="x8t9es0 x1fvot60 xo1l8bm xxio538 x108nfp6 xq9mrsl x1mzt3pk x1vvkbs x13faqbe xeuugli x1iyjqo2" id="js_kv5">Mobile Feed</div></div></div></div></div></div></div></div><div><div><div aria-labelledby="js_kv8" class="x1i10hfl x1qjc9v5 xjbqb8w xjqpnuy xc5r6h4 xqeqjp1 x1phubyo x13fuv20 x18b5jzi x1q0q8m5 x1t7ytsu x972fbf x10w94by x1qhh985 x14e42zd x9f619 x1ypdohk x78zum5 xdl72j9 xdt5ytf x2lah0s x3ct3a4 xdj266r x14z9mp xat24cr x1lziwak x2lwn1j xeuugli xexx8yu xyri2b x18d9i69 x1c1uobl x1n2onr6 x16tdsg8 x1hl2dhg xggy1nq x1ja2u2z x1t137rt" role="menuitem" tabindex="0"><div class="x78zum5 x1iyjqo2"><div class="x6s0dn4 x78zum5 x1q0g3np xozqiw3 x2lwn1j xeuugli x1iyjqo2 x8va1my x1i5p2am x1whfx0g xr2y4jy x1ihp6rs x1y1aw1k xwib8y2 xmzvs34 xf159sx xo1l8bm x108nfp6 x1v911su"><div class="x6s0dn4 x3nfvp2 x1q0g3np xozqiw3 x2lwn1j xeuugli x1c4vz4f x8va1my x2lah0s xamitd3"><div class="x3nfvp2 x2lah0s"><i alt="" data-visualcompletion="css-img" class="img sp_5qrb4nm05TS_2x sx_46c0bb"></i></div></div><div class="x1iyjqo2 xamitd3" data-sscoverage-ignore="true"><div class="x6s0dn4 x1q0g3np xozqiw3 x2lwn1j x1iyjqo2 xs83m0k x1xsc7gk x78zum5 xeuugli"><div class="x8t9es0 x1fvot60 xo1l8bm xxio538 x108nfp6 xq9mrsl x1mzt3pk x1vvkbs x13faqbe xeuugli x1iyjqo2" id="js_kv8">Desktop Feed</div></div></div></div></div></div></div></div></div></div></div>
+
+element.style {
+    max-height: 350px;
+    min-width: 500px;
+}
+
+.x18d9i69 {
+    padding-bottom: 0;
+}
+.xdt5ytf {
+    flex-direction: column;
+}
+.x78zum5 {
+    display: flex
+;
+}
+.x1lziwak {
+    margin-left: 0;
+}
+.x1c1uobl {
+    padding-left: 0;
+}
+.x14z9mp {
+    margin-right: 0;
+}
+.xexx8yu {
+    padding-top: 0;
+}
+.xdj266r {
+    margin-top: 0;
+}
+.xat24cr {
+    margin-bottom: 0;
+}
+
+.x8va1my:not([stylex-hack])>:not(:last-child) {
+    margin-right: 8px;
+}
+
+.sp_5qrb4nm05TS_2x.sx_46c0bb {
+    width: 20px;
+    height: 20px;
+    background-position: -189px -1326px;
+}
+
+i.img {
+    -ms-high-contrast-adjust: none;
+}
+.sp_5qrb4nm05TS_2x {
+    background-image: url(/rsrc.php/v4/yA/r/66SW39fHNmr.png);
+    background-size: 249px 1381px;
+    background-repeat: no-repeat;
+    display: inline-block;
+    height: 16px;
+    width: 16px;
+}
+
+user agent stylesheet
+i {
+    font-style: italic;
+}
+
+.xeuugli {
+    min-width: 0;
+}
+.xo1l8bm {
+    font-weight: 400;
+}
+.x1vvkbs {
+    word-wrap: break-word;
+}
+
+Drop downs:
+### Feeds
+Facebook - Feed
+- Mobile Feed
+- Desktop Feed
+Instagram - Feed
+- Instagram Mobile Feed
+- Instagram Desktop Feed
+### Stories and Reels
+Facebook - Video feeds
+- Facebook video feeds (Video tab - mobile)
+- Facebook video feeds (Videos - mobile)
+- Facebook video feeds (Fullscreen - mobile)
+Facebook - Right column
+- Desktop right column
+Instagram - Explore Feed
+- Instagram Explore Feed
+- Instagram Explore Video
+Messenger - Inbox
+- Messenger inbox
+	- Ad view / Expanded view
+Instagram - Stories
+- Instagram Mobile Stories
+- Instagram Desktop Stories
+Facebook - Stories
+- Facebook Stories
+Messenger - Stories
+- Messenger Stories
+Instagram - Reels
+- Instagram Reels
+Facebook - Facebook Reels
+- Facebook Reels
+### In-stream ads for videos and reels
+Facebook - In-stream videos
+
+### Search results
+Facebook - Marketplace Search
+
+

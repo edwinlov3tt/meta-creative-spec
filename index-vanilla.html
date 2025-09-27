@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Creative Preview Prototype v4</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body class="locked">
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="app-header container" id="app-header">
+    <h1 class="app-title">Creative Preview</h1>
+    <div class="header-actions">
+      <button class="btn btn-secondary" id="btn-reset" title="Reset all form data">Reset</button>
+      <button class="btn btn-secondary" id="btn-save" title="Save fields locally">Save</button>
+      <button class="btn btn-secondary" id="btn-regenerate" title="Regenerate ad copy with AI">Regenerate</button>
+      <button class="btn" id="btn-copy" title="Copy all fields as JSON">Copy</button>
+      <button class="btn" id="btn-download-spec" title="Download spec sheet (JSON)">Download Spec</button>
+      <div class="split" role="separator" aria-orientation="vertical"></div>
+      <button class="btn btn-accent" id="btn-detailed-preview" title="View all ad placements">All Views</button>
+      <button class="btn btn-accent" id="btn-export-png" title="Export preview as PNG">Export PNG</button>
+      <button class="btn btn-accent" id="btn-export-jpg" title="Export JPG">Export JPG</button>
+    </div>
+  </header>
+
+  <main id="main" class="container grid grid-lock">
+    <div class="left-col scroll-col" id="left-col">
+      <!-- STEP 1 -->
+      <details class="card collapsible" id="step1-card" open>
+        <summary class="card-header summary-row">
+          <div>
+            <h2>Step 1: Advertiser Info</h2>
+            <div class="muted">Provide brand context, website, and goals.</div>
+          </div>
+        </summary>
+
+        <div class="form-grid">
+          <label class="field field-col">
+            <span>Advertiser Facebook Link</span>
+            <div style="display: flex; gap: 8px;">
+              <input id="input-facebook-link" type="url" placeholder="https://facebook.com/brand" style="flex: 1;" />
+              <button class="btn btn-primary" id="btn-verify-facebook" type="button">Verify</button>
+            </div>
+          </label>
+
+          <label class="field field-col">
+            <span>Website / CTURL <em class="muted">(required*)</em></span>
+            <input id="input-url" type="url" placeholder="https://example.com/landing" />
+          </label>
+
+          <label class="field field-col">
+            <span>Company Overview <em class="muted">(required*)</em> <em class="counter" id="count-company">0/500</em></span>
+            <textarea id="input-company" rows="2" maxlength="500" placeholder="What the brand does..."></textarea>
+          </label>
+
+          <!-- Campaign objective full-width textarea -->
+          <label class="field field-col">
+            <span>Campaign Objective <em class="counter" id="count-objective">0/300</em></span>
+            <textarea id="input-objective" rows="2" maxlength="300" placeholder="Leads, sales, awareness… what should this ad do?"></textarea>
+          </label>
+
+          <button class="btn btn-primary field-col" id="btn-generate-copy" type="button">Generate Ad Copy</button>
+
+          <details class="field field-col">
+            <summary class="summary">Additional Options</summary>
+            <div class="options-grid">
+              <label class="field">
+                <span>Sales Formula</span>
+                <select id="input-formula">
+                  <option value="">—</option>
+                  <option value="AIDA">AIDA</option>
+                  <option value="HSO">HSO</option>
+                </select>
+              </label>
+
+              <label class="field field-col">
+                <span>Company Information (optional) <em class="counter" id="count-company-info">0/300</em></span>
+                <textarea id="input-company-info" rows="2" maxlength="300"></textarea>
+              </label>
+
+              <label class="field field-col">
+                <span>Additional Instructions (optional) <em class="counter" id="count-instructions">0/200</em></span>
+                <textarea id="input-instructions" rows="2" maxlength="200"></textarea>
+              </label>
+
+              <label class="field field-col">
+                <span>Custom Prompt <em class="counter" id="count-prompt">0/200</em></span>
+                <textarea id="input-prompt" rows="2" maxlength="200"></textarea>
+              </label>
+
+              <label class="field">
+                <span>Creative Upload</span>
+                <input id="input-creative" type="file" accept=".png,.jpg,.jpeg,.gif" />
+              </label>
+
+              <div class="divider field-col"></div>
+              
+              <label class="field" style="grid-column: span 2;">
+                <span>Facebook Page ID</span>
+                <input id="facebook-page-id" type="text" readonly />
+              </label>
+              
+              <label class="field" style="grid-column: span 2;">
+                <span>Category</span>
+                <input id="facebook-category" type="text" readonly />
+              </label>
+              
+              <label class="field">
+                <span>Page Name</span>
+                <input id="facebook-page-name" type="text" readonly />
+              </label>
+              
+              <label class="field">
+                <span>Cover Photo</span>
+                <input id="facebook-cover-photo" type="url" readonly />
+              </label>
+              
+              <label class="field field-col">
+                <span>Instagram Handle</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <input id="instagram-handle" type="text" readonly style="flex: 1;" />
+                  <a id="instagram-link" href="#" target="_blank" rel="noopener" style="display: none; color: #1877F2; text-decoration: none; font-size: 16px;" title="Visit Instagram Profile">🔗</a>
+                </div>
+              </label>
+
+              <!-- Hidden field to store complete Facebook page data -->
+              <input type="hidden" id="facebook-page-data" />
+            </div>
+          </details>
+        </div>
+      </details>
+
+      <!-- STEP 2 -->
+      <details class="card collapsible step-disabled" id="step2-card">
+        <summary class="card-header summary-row">
+          <div>
+            <h2>Step 2: Ad Copy</h2>
+            <div class="muted">Left: editable fields • Right: live preview</div>
+          </div>
+        </summary>
+
+        <div class="form-grid">
+          <!-- Spec fields -->
+          <label class="field">
+            <span>Ad Name (internal)</span>
+            <input id="ad-name" type="text" placeholder="Membership Promo June 2025" />
+          </label>
+
+          <label class="field field-col">
+            <span>Post Text <em class="counter" id="count-post">0/125</em></span>
+            <textarea id="post-text" rows="3" maxlength="125" placeholder="Tell people what you’re promoting in 125 chars or less"></textarea>
+          </label>
+
+          <label class="field">
+            <span>Headline <em class="counter" id="count-headline">0/40</em></span>
+            <input id="headline" type="text" maxlength="40" placeholder="Compelling headline" />
+          </label>
+
+          <label class="field">
+            <span>Link Description <em class="counter" id="count-desc">0/30</em></span>
+            <input id="link-desc" type="text" maxlength="30" placeholder="Short supporting copy" />
+          </label>
+
+          <label class="field field-col">
+            <span>Destination URL</span>
+            <input id="dest-url" type="url" placeholder="https://example.com" />
+            <div class="link-preview" id="utm-preview"></div>
+          </label>
+
+          <label class="field">
+            <span>Display Link</span>
+            <input id="display-link" type="text" placeholder="example.com" />
+          </label>
+
+          <label class="field">
+            <span>CTA</span>
+            <select id="cta">
+              <option selected>Learn More</option>
+              <option>Apply Now</option>
+              <option>Book Now</option>
+              <option>Call Now</option>
+              <option>Contact Us</option>
+              <option>Donate Now</option>
+              <option>Download</option>
+              <option>Get Access</option>
+              <option>Get Offer</option>
+              <option>Get Quote</option>
+              <option>Get Showtimes</option>
+              <option>Listen Now</option>
+              <option>Order Now</option>
+              <option>Play Game</option>
+              <option>Request Time</option>
+              <option>See Menu</option>
+              <option>Send Message</option>
+              <option>Shop Now</option>
+              <option>Sign Up</option>
+              <option>Subscribe</option>
+              <option>Watch More</option>
+            </select>
+          </label>
+
+          <details class="field field-col">
+            <summary class="summary">Ad Copy Options</summary>
+            <div class="options-grid">
+              <label class="field">
+                <span>Remove Post Text Limit</span>
+                <input type="checkbox" id="toggle-limit" />
+              </label>
+              
+              <label class="field">
+                <span>Include Emoji in Post Text</span>
+                <input type="checkbox" id="toggle-emoji" checked />
+              </label>
+
+              <div class="divider field-col"></div>
+
+              <label class="field">
+                <span>UTM Campaign</span>
+                <input id="utm-campaign" type="text" value="Ignite" />
+              </label>
+              <label class="field">
+                <span>UTM Medium</span>
+                <input id="utm-medium" type="text" value="Facebook" />
+              </label>
+              <label class="field">
+                <span>UTM Source</span>
+                <input id="utm-source" type="text" value="Townsquare" />
+              </label>
+              <label class="field">
+                <span>UTM Content</span>
+                <input id="utm-content" type="text" placeholder="{{ad-name}}" />
+              </label>
+              <div class="field field-col muted tiny">The UTM URL is generated from <strong>Website / CTURL</strong> or Destination URL.</div>
+            </div>
+          </details>
+
+        </div>
+      </details>
+    </div>
+
+    <!-- RIGHT COLUMN: PREVIEW -->
+    <section class="card right-col scroll-col" aria-labelledby="preview-title" id="preview-card">
+      <summary class="card-header summary-row sticky-top" id="preview-title">
+        <div>
+          <h2>Preview</h2>
+          <div class="muted">Choose placement, device, and format.</div>
+        </div>
+      </summary>
+
+      <div class="card-header-preview toolbar-collapsible">
+        <details id="toolbar-details">
+          <summary class="summary toolbar-summary">Preview Controls</summary>
+          <div class="toolbar">
+            <label class="chip">
+              <span>Platform</span>
+              <select id="platform">
+                <option value="facebook" selected>Facebook</option>
+                <option value="instagram">Instagram</option>
+              </select>
+            </label>
+            <label class="chip" id="chip-device">
+              <span>Device</span>
+              <select id="device">
+                <option value="desktop" selected>Desktop</option>
+                <option value="mobile">Mobile</option>
+              </select>
+            </label>
+            <label class="chip">
+              <span id="label-adtype">Ad Type</span>
+              <select id="adtype">
+                <option value="feed" selected>Feed</option>
+                <option value="story">Story</option>
+                <option value="reel">Reel</option>
+              </select>
+            </label>
+            <label class="chip" id="chip-format">
+              <span id="label-format">Ad Format</span>
+              <select id="format">
+                <option value="original" selected>Original</option>
+                <option value="square">1:1</option>
+              </select>
+            </label>
+            <label class="chip" id="chip-adformat" style="display:none">
+              <span>Ad Format</span>
+              <select id="fb-adformat">
+                <option value="single">Single Image</option>
+                <option value="carousel">Carousel</option>
+              </select>
+            </label>
+          </div>
+        </details>
+      </div>
+
+      <div class="preview-viewport absolute-center" id="preview-viewport" aria-live="polite">
+        <div class="overflow-shadow top" id="shadow-top"></div>
+        <div class="overflow-shadow bottom" id="shadow-bottom"></div>
+
+        <!-- Export node -->
+        <div id="preview-root" class="preview platform-facebook adtype-feed">
+          <!-- Common top for feeds -->
+          <div class="preview-top" id="preview-top">
+            <div class="avatar"></div>
+            <div class="meta">
+              <div class="brand" id="brand-name">Your Brand</div>
+              <div class="handle" id="brand-handle">@brand</div>
+              <div class="muted privacy-row">
+                <span class="sponsored">Sponsored · </span>
+                <img src="./creative-icons/globe.png" alt="Globe" class="globe-icon" aria-hidden="true" />
+              </div>
+            </div>
+            <div class="kebab" aria-hidden="true">⋯</div>
+          </div>
+
+          <div class="preview-text" id="preview-post">
+            Tell people what you’re promoting in 125 chars or less
+          </div>
+
+          <figure class="preview-media no-gap">
+            <img id="preview-image" src="./assets/facebook-ad-mockup.png" alt="Ad creative preview" />
+          </figure>
+
+          <!-- Facebook Feed linkcard -->
+          <div class="preview-linkcard fb" id="fb-linkcard">
+            <div class="linkcard-meta">
+              <div class="linkcard-domain" id="preview-display-link">example.com</div>
+              <div class="linkcard-headline" id="preview-headline">Compelling headline</div>
+              <div class="linkcard-desc" id="preview-desc">Short supporting copy</div>
+            </div>
+            <a class="cta fb-cta" id="preview-cta" href="#" target="_blank" rel="noopener">Learn More</a>
+          </div>
+
+          <!-- Facebook actions -->
+          <div class="fb-actions" id="fb-actions">
+            <button class="fb-action"><span class="icon like" aria-hidden="true"></span><span class="fb-label">Like</span></button>
+            <button class="fb-action"><span class="icon comment" aria-hidden="true"></span><span class="fb-label">Comment</span></button>
+            <button class="fb-action"><span class="icon share" aria-hidden="true"></span><span class="fb-label">Share</span></button>
+          </div>
+
+          <!-- Instagram below-image area -->
+          <div class="ig-below" id="ig-below">
+            <div class="ig-cta"><a id="ig-cta-btn" href="#" target="_blank" rel="noopener">Learn More</a></div>
+            <div class="ig-actions">
+              <button class="ig-action love" aria-label="Love"></button>
+              <button class="ig-action comment" aria-label="Comment"></button>
+              <button class="ig-action send" aria-label="Send"></button>
+              <button class="ig-action bookmark" aria-label="Save"></button>
+            </div>
+            <div class="ig-views">89 views</div>
+            <div class="ig-primary"><span id="ig-company"><span id="instagram-brand-name">Your Brand</span></span> <span id="ig-primary-text">Tell people what you're promoting…</span></div>
+            <div class="ig-comments">View all 14 comments</div>
+          </div>
+
+          <!-- Story/Reel overlay for both platforms -->
+          <div class="overlay" id="sr-overlay">
+            <div class="overlay-top-row">
+              <div class="avatar small"></div>
+              <div class="company">Your Brand</div>
+              <div class="sponsored">Sponsored</div>
+              <button class="overlay-ellipsis" aria-label="More">⋯</button>
+              <button class="overlay-close" aria-label="Close">×</button>
+            </div>
+            <div class="overlay-primary" id="overlay-primary">Tell people what you’re promoting…</div>
+            <div class="overlay-cta"><a id="overlay-cta-btn" href="#" target="_blank" rel="noopener">Learn More</a></div>
+            <aside class="overlay-actions">
+              <button class="ig-action love" aria-label="Love"></button>
+              <button class="ig-action comment" aria-label="Comment"></button>
+              <button class="ig-action send" aria-label="Send"></button>
+              <button class="ig-action ellipsis" aria-label="More"></button>
+            </aside>
+          </div>
+        </div>
+      </div>
+
+      <div class="note muted tiny">Note: Visual approximation for planning only.</div>
+    </section>
+  </main>
+
+  <!-- libs via CDN -->
+  <script src="https://unpkg.com/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
+  <script src="https://unpkg.com/dom-to-image-more@3.3.7/dist/dom-to-image-more.min.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

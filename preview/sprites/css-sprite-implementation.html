@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Sprite Implementation Example</title>
+    <style>
+        /* Base sprite class - like Facebook's approach */
+        .icon-sprite {
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDwhLS0gRmFjZWJvb2sgaWNvbiAtLT4KICAgIDxyZWN0IHg9IjAiIHk9IjAiIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgZmlsbD0iIzE4NzdGMiIvPgogICAgPHRleHQgeD0iMTIiIHk9IjE2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1zaXplPSIxMnB4Ij5mPC90ZXh0PgogICAgCiAgICA8IS0tIEluc3RhZ3JhbSBpY29uIC0tPgogICAgPGNpcmNsZSBjeD0iMzYiIGN5PSIxMiIgcj0iMTIiIGZpbGw9InVybCgjZ3JhZGllbnQpIi8+CiAgICA8Y2lyY2xlIGN4PSIzNiIgY3k9IjEyIiByPSI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiLz4KICAgIDxjaXJjbGUgY3g9IjQyIiBjeT0iNiIgcj0iMiIgZmlsbD0id2hpdGUiLz4KICAgIAogICAgPCEtLSBDb2cgaWNvbiAtLT4KICAgIDxjaXJjbGUgY3g9IjYwIiBjeT0iMTIiIHI9IjEwIiBmaWxsPSIjNjU2NzZiIi8+CiAgICA8Y2lyY2xlIGN4PSI2MCIgY3k9IjEyIiByPSI2IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogICAgPGNpcmNsZSBjeD0iNjAiIGN5PSIxMiIgcj0iMiIgZmlsbD0id2hpdGUiLz4KICAgIAogICAgPCEtLSBEb3dubG9hZCBpY29uIC0tPgogICAgPHJlY3QgeD0iNzgiIHk9IjQiIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iIzQyODVmNCIgcng9IjIiLz4KICAgIDxwYXRoIGQ9Ik04NiA4djZsMyAtM2wtMyAtM3oiIGZpbGw9IndoaXRlIi8+CiAgICAKICAgIDxkZWZzPgogICAgICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZGllbnQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICAgICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojODMzYWI0O3N0b3Atb3BhY2l0eToxIiAvPgogICAgICAgICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiNmZDE0MWQ7c3RvcC1vcGFjaXR5OjEiIC8+CiAgICAgICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDwvZGVmcz4KPC9zdmc+');
+            background-repeat: no-repeat;
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Specific icon positions */
+        .icon-facebook {
+            background-position: 0 0;
+        }
+
+        .icon-instagram {
+            background-position: -24px 0;
+        }
+
+        .icon-settings {
+            background-position: -48px 0;
+        }
+
+        .icon-download {
+            background-position: -72px 0;
+        }
+
+        /* Alternative implementation using CSS custom properties */
+        .icon-sprite-v2 {
+            background-image: var(--sprite-url);
+            background-repeat: no-repeat;
+            display: inline-block;
+            width: var(--icon-size, 24px);
+            height: var(--icon-size, 24px);
+            background-position: var(--sprite-x, 0) var(--sprite-y, 0);
+        }
+
+        /* Demo styles */
+        .demo-section {
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .icon-demo {
+            text-align: center;
+            padding: 16px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #1877f2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 4px;
+        }
+
+        .btn-secondary {
+            background: #f0f2f5;
+            color: #1c1e21;
+        }
+
+        /* How to integrate with existing ad previewer classes */
+        .ad-previewer-icons {
+            /* Replace Font Awesome with sprites */
+        }
+
+        .btn-actions .icon-sprite {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Example of how to replace current FA icons */
+        .fa-cog { /* Remove Font Awesome */
+            display: none;
+        }
+        
+        .fa-cog + .icon-sprite.icon-settings {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-section">
+        <h2>CSS Sprite Implementation</h2>
+        <p>This demonstrates how to implement Facebook-style CSS sprites in the ad previewer.</p>
+        
+        <div class="icon-grid">
+            <div class="icon-demo">
+                <i class="icon-sprite icon-facebook"></i>
+                <p>Facebook</p>
+            </div>
+            <div class="icon-demo">
+                <i class="icon-sprite icon-instagram"></i>
+                <p>Instagram</p>
+            </div>
+            <div class="icon-demo">
+                <i class="icon-sprite icon-settings"></i>
+                <p>Settings</p>
+            </div>
+            <div class="icon-demo">
+                <i class="icon-sprite icon-download"></i>
+                <p>Download</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2>Usage in Buttons (Like Current Ad Previewer)</h2>
+        
+        <button class="btn">
+            <i class="icon-sprite icon-facebook"></i>
+            Facebook Feed
+        </button>
+        
+        <button class="btn btn-secondary">
+            <i class="icon-sprite icon-settings"></i>
+            Settings
+        </button>
+        
+        <button class="btn btn-secondary">
+            <i class="icon-sprite icon-download"></i>
+            Export PNG
+        </button>
+    </div>
+
+    <div class="demo-section">
+        <h2>Alternative: CSS Custom Properties Approach</h2>
+        <p>More flexible for dynamic sprite management</p>
+        
+        <style>
+            .custom-icon-1 {
+                --sprite-x: 0px;
+                --sprite-y: 0px;
+                --icon-size: 32px;
+            }
+            
+            .custom-icon-2 {
+                --sprite-x: -24px;
+                --sprite-y: 0px;
+                --icon-size: 32px;
+            }
+        </style>
+        
+        <i class="icon-sprite-v2 custom-icon-1" style="--sprite-url: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDx0ZXh0IHg9IjEyIiB5PSIxNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzE4NzdGMiIgZm9udC1zaXplPSIxNnB4Ij5GQjwvdGV4dD4KPC9zdmc+')"></i>
+        
+        <i class="icon-sprite-v2 custom-icon-2" style="--sprite-url: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDx0ZXh0IHg9IjM2IiB5PSIxNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI0UxMzA2QyIgZm9udC1zaXplPSIxNnB4Ij5JRzwvdGV4dD4KPC9zdmc+')"></i>
+    </div>
+
+    <div class="demo-section">
+        <h2>Implementation Steps for Ad Previewer</h2>
+        <ol>
+            <li><strong>Create sprite sheet:</strong> Combine all icons into a single PNG/SVG file</li>
+            <li><strong>Generate CSS classes:</strong> Create classes with background-position for each icon</li>
+            <li><strong>Replace Font Awesome:</strong> Replace FA classes with sprite classes</li>
+            <li><strong>Update HTML:</strong> Change from <code>&lt;i class="fas fa-cog"&gt;</code> to <code>&lt;i class="icon-sprite icon-settings"&gt;</code></li>
+            <li><strong>Optimize loading:</strong> Use a single HTTP request for all icons</li>
+        </ol>
+    </div>
+
+    <div class="demo-section">
+        <h2>Benefits for Ad Previewer</h2>
+        <ul>
+            <li>📈 <strong>Performance:</strong> Single HTTP request instead of multiple icon files</li>
+            <li>🎨 <strong>Consistency:</strong> All icons from the same source ensure visual consistency</li>
+            <li>📱 <strong>Caching:</strong> Better browser caching efficiency</li>
+            <li>🎯 <strong>Control:</strong> Full control over icon appearance and sizing</li>
+            <li>📦 <strong>Bundle size:</strong> Smaller than Font Awesome for limited icon sets</li>
+        </ul>
+    </div>
+
+    <script>
+        // JavaScript to help generate sprite CSS from coordinates
+        function generateSpriteCSS(iconName, x, y, width = 24, height = 24) {
+            return `
+.icon-${iconName} {
+    background-position: -${x}px -${y}px;
+    width: ${width}px;
+    height: ${height}px;
+}`;
+        }
+
+        // Example usage
+        console.log('Generated CSS:');
+        console.log(generateSpriteCSS('facebook', 0, 0));
+        console.log(generateSpriteCSS('instagram', 24, 0));
+        console.log(generateSpriteCSS('settings', 48, 0));
+        
+        // Function to replace Font Awesome with sprites
+        function convertToSprites() {
+            const faIcons = document.querySelectorAll('.fas, .far, .fab');
+            faIcons.forEach(icon => {
+                const classList = Array.from(icon.classList);
+                const faClass = classList.find(cls => cls.startsWith('fa-'));
+                
+                if (faClass) {
+                    const iconName = faClass.replace('fa-', '');
+                    icon.className = `icon-sprite icon-${iconName}`;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

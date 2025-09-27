@@ -1,0 +1,206 @@
+/* Add to styles.css - CSS Sprite System for Ad Previewer */
+
+/* Base sprite class - similar to Facebook's approach */
+.ap-icon {
+  background-image: url('./assets/icons/ad-previewer-sprites.png');
+  background-repeat: no-repeat;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+}
+
+/* Large icon variant */
+.ap-icon-lg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Small icon variant */
+.ap-icon-sm {
+  width: 12px;
+  height: 12px;
+}
+
+/* Individual icon positions (replace Font Awesome icons) */
+.ap-icon-cog {
+  background-position: 0 0; /* Settings/Cog icon */
+}
+
+.ap-icon-mobile {
+  background-position: -16px 0; /* Mobile device icon */
+}
+
+.ap-icon-desktop {
+  background-position: -32px 0; /* Desktop icon */
+}
+
+.ap-icon-download {
+  background-position: -48px 0; /* Download icon */
+}
+
+.ap-icon-clipboard {
+  background-position: -64px 0; /* Copy to clipboard */
+}
+
+.ap-icon-ellipsis-v {
+  background-position: -80px 0; /* Vertical ellipsis (⋮) */
+}
+
+.ap-icon-newspaper {
+  background-position: -96px 0; /* News feed icon */
+}
+
+.ap-icon-book-open {
+  background-position: -112px 0; /* Story icon */
+}
+
+.ap-icon-film {
+  background-position: -128px 0; /* Reel icon */
+}
+
+.ap-icon-image {
+  background-position: -144px 0; /* Single image icon */
+}
+
+.ap-icon-images {
+  background-position: -160px 0; /* Carousel icon */
+}
+
+.ap-icon-filter {
+  background-position: -176px 0; /* Lead form icon */
+}
+
+.ap-icon-facebook-messenger {
+  background-position: -192px 0; /* Messenger icon */
+}
+
+.ap-icon-pencil {
+  background-position: 0 -16px; /* Edit icon */
+}
+
+.ap-icon-facebook {
+  background-position: -16px -16px; /* Facebook platform icon */
+}
+
+.ap-icon-instagram {
+  background-position: -32px -16px; /* Instagram platform icon */
+}
+
+/* Social media action icons for preview */
+.ap-icon-like {
+  background-position: -48px -16px;
+}
+
+.ap-icon-comment {
+  background-position: -64px -16px;
+}
+
+.ap-icon-share {
+  background-position: -80px -16px;
+}
+
+.ap-icon-heart {
+  background-position: -96px -16px; /* Instagram heart */
+}
+
+.ap-icon-send {
+  background-position: -112px -16px; /* Instagram send */
+}
+
+.ap-icon-bookmark {
+  background-position: -128px -16px; /* Instagram save */
+}
+
+/* Button icon combinations */
+.btn .ap-icon {
+  margin-right: 6px;
+}
+
+/* Replace existing Font Awesome references */
+.btn-actions-icon {
+  /* Remove Font Awesome dependency */
+}
+
+/* Specific button icon sizes */
+.btn-actions .ap-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.template-setting-icon {
+  /* Replace FA icons in toolbar */
+}
+
+/* Facebook preview icons using sprites */
+.preview .ap-icon-like,
+.preview .ap-icon-comment,
+.preview .ap-icon-share {
+  width: 16px;
+  height: 16px;
+  opacity: 0.9;
+}
+
+/* Instagram preview icons */
+.ig-action .ap-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Hover effects for sprite icons */
+.btn:hover .ap-icon {
+  opacity: 0.8;
+}
+
+/* Dark mode support for sprites */
+.preview.platform-instagram .ap-icon {
+  filter: brightness(0) invert(1); /* Make icons white for dark backgrounds */
+}
+
+/* Retina/high-DPI support */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+  .ap-icon {
+    background-image: url('./assets/icons/ad-previewer-sprites@2x.png');
+    background-size: 208px 32px; /* Half the actual 2x sprite dimensions */
+  }
+}
+
+/* CSS Custom Properties approach for dynamic icons */
+.ap-icon-dynamic {
+  background-image: var(--sprite-url, url('./assets/icons/ad-previewer-sprites.png'));
+  background-position: var(--sprite-x, 0) var(--sprite-y, 0);
+  background-repeat: no-repeat;
+  display: inline-block;
+  width: var(--icon-width, 16px);
+  height: var(--icon-height, 16px);
+}
+
+/* Animation support for sprite icons */
+.ap-icon-loading {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Utility classes for common icon modifications */
+.ap-icon-muted {
+  opacity: 0.6;
+}
+
+.ap-icon-primary {
+  filter: hue-rotate(200deg); /* Tint to primary color */
+}
+
+.ap-icon-success {
+  filter: hue-rotate(120deg); /* Green tint */
+}
+
+.ap-icon-warning {
+  filter: hue-rotate(45deg); /* Yellow/orange tint */
+}
+
+.ap-icon-danger {
+  filter: hue-rotate(0deg); /* Red tint */
+}

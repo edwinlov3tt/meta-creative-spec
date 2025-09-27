@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Facebook Integration</title>
+</head>
+<body>
+    <h2>Facebook Integration Test</h2>
+    
+    <label>
+        Facebook URL:
+        <input type="url" id="fb-url" placeholder="https://facebook.com/example" style="width: 300px;">
+    </label>
+    <br><br>
+    
+    <label>
+        Website URL:
+        <input type="url" id="website-url" placeholder="https://example.com" style="width: 300px;">
+    </label>
+    <br><br>
+    
+    <button onclick="testFacebookParsing()">Test Client-Side Parsing</button>
+    <button onclick="testServerAPI()">Test Server API</button>
+    
+    <div id="results" style="margin-top: 20px; padding: 10px; background: #f5f5f5; border-radius: 5px;">
+        Results will appear here...
+    </div>
+
+    <script>
+        function extractFacebookPageInfoFromUrl(url) {
+          try {
+            const urlObj = new URL(url);
+            const pathname = urlObj.pathname;
+            
+            let pageName = null;
+            
+            if (pathname.match(/^\/[^\/]+\/?$/)) {
+              pageName = pathname.replace(/^\/|\/$/g, '');
+            }
+            else if (pathname.includes('/pages/')) {
+              const match = pathname.match(/\/pages\/([^\/]+)/);
+              if (match) {
+                pageName = match[1];
+              }
+            }
+            else if (pathname === '/profile.php') {
+              const params = new URLSearchParams(urlObj.search);
+              pageName = params.get('id');
+            }
+            
+            if (pageName) {
+              pageName = decodeURIComponent(pageName);
+              pageName = pageName.replace(/[._-]/g, ' ');
+              pageName = pageName.replace(/\b\w/g, l => l.toUpperCase());
+              
+              return {
+                name: pageName,
+                picture: `https://graph.facebook.com/${encodeURIComponent(pageName)}/picture?type=large`,
+                url: url,
+                method: 'client_url_parsing'
+              };
+            }
+            
+            return null;
+          } catch (e) {
+            console.error('Error parsing Facebook URL:', e);
+            return null;
+          }
+        }
+
+        function testFacebookParsing() {
+            const url = document.getElementById('fb-url').value;
+            const result = extractFacebookPageInfoFromUrl(url);
+            document.getElementById('results').innerHTML = '<h3>Client-Side Parsing:</h3><pre>' + JSON.stringify(result, null, 2) + '</pre>';
+        }
+
+        async function testServerAPI() {
+            const fbUrl = document.getElementById('fb-url').value;
+            const websiteUrl = document.getElementById('website-url').value;
+            
+            try {
+                const response = await fetch('./api/facebook-page.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        facebookUrl: fbUrl,
+                        websiteUrl: websiteUrl 
+                    })
+                });
+                
+                const result = await response.json();
+                document.getElementById('results').innerHTML = '<h3>Server API:</h3><pre>' + JSON.stringify(result, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('results').innerHTML = '<h3>Error:</h3>' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

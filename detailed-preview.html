@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ad Preview - All Placements</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: 0 0% 100%;
+            --fg: 240 10% 3.9%;
+            --muted: 240 3.8% 46%;
+            --border: 240 5% 84%;
+            --card: 0 0% 100%;
+            --card-contrast: 240 5% 96%;
+            --ring: 221 83% 53%;
+            --accent: 221 83% 53%;
+            --radius: 14px;
+            --shadow: 0 10px 20px rgba(2,6,23,.06), 0 2px 6px rgba(2,6,23,.06);
+            
+            /* Meta colors */
+            --meta-bg: #f0f2f5;
+            --meta-secondary: #65676b;
+            --meta-blue: #1877F2;
+            --meta-border: #dddfe2;
+        }
+
+        * { box-sizing: border-box; }
+        
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: hsl(240 5% 96%);
+            color: hsl(var(--fg));
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .btn {
+            background: hsl(var(--accent));
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .section {
+            margin-bottom: 48px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 20px 0;
+            color: rgba(0, 0, 0, 0.75);
+        }
+
+        .previews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            max-width: 100%;
+        }
+
+        .preview-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .preview-header {
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+
+        .preview-platform {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .platform-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .fb-icon {
+            background: var(--meta-blue);
+        }
+
+        .ig-icon {
+            background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d);
+        }
+
+        .preview-content {
+            padding: 20px;
+            background: var(--meta-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+        }
+
+        /* Ad Preview Styles */
+        .ad-preview {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-size: 14px;
+        }
+
+        .facebook-feed {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .instagram-feed {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .story-reel {
+            width: 280px;
+            height: 498px;
+            position: relative;
+            border-radius: 12px;
+        }
+
+        /* Facebook Feed Layout */
+        .fb-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            gap: 8px;
+        }
+
+        .fb-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ddd;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .fb-meta {
+            flex: 1;
+        }
+
+        .fb-brand {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .fb-sponsored {
+            color: var(--meta-secondary);
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .globe-icon {
+            width: 12px;
+            height: 12px;
+            fill: currentColor;
+        }
+
+        .fb-options {
+            color: var(--meta-secondary);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .fb-text {
+            padding: 0 16px 12px;
+            line-height: 1.4;
+        }
+
+        .fb-media {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #65676b;
+        }
+
+        .fb-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .fb-link-card {
+            border-top: 1px solid var(--meta-border);
+            padding: 12px 16px;
+            background: var(--meta-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .fb-link-info {
+            flex: 1;
+        }
+
+        .fb-link-domain {
+            font-size: 12px;
+            color: var(--meta-secondary);
+            text-transform: uppercase;
+        }
+
+        .fb-link-title {
+            font-weight: 600;
+            font-size: 16px;
+            margin: 4px 0;
+        }
+
+        .fb-link-desc {
+            font-size: 14px;
+            color: var(--meta-secondary);
+        }
+
+        .fb-cta {
+            background: #e4e6ea;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #050505;
+        }
+
+        .fb-actions {
+            display: flex;
+            border-top: 1px solid #e4e6ea;
+        }
+
+        .fb-action {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            color: var(--meta-secondary);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .fb-action:hover {
+            background: rgba(0,0,0,0.05);
+        }
+
+        /* Instagram Feed Layout */
+        .ig-header {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+        }
+
+        .ig-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #ddd;
+            margin-right: 12px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .ig-username {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .ig-sponsored {
+            font-size: 12px;
+            color: #8e8e8e;
+        }
+
+        .ig-options {
+            margin-left: auto;
+            cursor: pointer;
+        }
+
+        .ig-media {
+            width: 100%;
+            aspect-ratio: 1;
+            background: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #65676b;
+        }
+
+        .ig-media img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .ig-cta-overlay {
+            padding: 10px 16px;
+            border-bottom: 1px solid #efefef;
+        }
+
+        .ig-cta-btn {
+            background: none;
+            border: none;
+            font-weight: 600;
+            color: #0095f6;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .ig-actions {
+            display: flex;
+            padding: 8px 16px;
+            gap: 16px;
+        }
+
+        .ig-action {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .ig-content {
+            padding: 0 16px 16px;
+        }
+
+        .ig-likes {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .ig-caption {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        /* Story/Reel Layout */
+        .story-content {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 16px;
+            color: white;
+            background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.4) 100%);
+        }
+
+        .story-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .story-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            border: 2px solid white;
+        }
+
+        .story-brand {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .story-sponsored {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .story-footer {
+            text-align: center;
+        }
+
+        .story-text {
+            font-size: 14px;
+            margin-bottom: 16px;
+            text-align: center;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .story-cta {
+            background: rgba(255,255,255,0.95);
+            color: #262626;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .story-bg-fb {
+            background: linear-gradient(45deg, #1877F2, #42a5f5);
+        }
+
+        .story-bg-ig {
+            background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d);
+        }
+
+        .note {
+            font-size: 12px;
+            color: hsl(var(--muted));
+            text-align: center;
+            margin-top: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .previews-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Ad Preview - All Placements</h1>
+            <button class="btn" onclick="window.location.href='index.html'">← Back to Editor</button>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">Feed Placements</h2>
+            <div class="previews-grid">
+                <!-- Facebook Mobile Feed -->
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div class="preview-platform">
+                            <div class="platform-icon fb-icon"></div>
+                            <span>Facebook Mobile Feed</span>
+                        </div>
+                    </div>
+                    <div class="preview-content">
+                        <div class="ad-preview facebook-feed">
+                            <div class="fb-header">
+                                <div class="fb-avatar" id="fb-mobile-avatar"></div>
+                                <div class="fb-meta">
+                                    <div class="fb-brand" id="fb-mobile-brand">Your Brand</div>
+                                    <div class="fb-sponsored">
+                                        Sponsored · 
+                                        <svg class="globe-icon" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0a8 8 0 100 16A8 8 0 008 0zm6 8a5.97 5.97 0 01-1.057 3.386A7.44 7.44 0 0013 11H9V9h5.917zM7 7V1.051A6.01 6.01 0 003 3c-.61.61-1.12 1.333-1.49 2.127L7 7zm2-5.917A6.006 6.006 0 0112.949 7H9V1.083zM7 9v2H3c-.345 0-.68.036-1 .104A6.002 6.002 0 007 2.083V9zm2 2h3.95A6.01 6.01 0 019 13.95V11z"></path></svg>
+                                    </div>
+                                </div>
+                                <div class="fb-options">⋯</div>
+                            </div>
+                            <div class="fb-text" id="fb-mobile-text">Tell people what you're promoting in 125 chars or less</div>
+                            <div class="fb-media" id="fb-mobile-media">[Ad Creative]</div>
+                            <div class="fb-link-card">
+                                <div class="fb-link-info">
+                                    <div class="fb-link-domain" id="fb-mobile-domain">example.com</div>
+                                    <div class="fb-link-title" id="fb-mobile-headline">Compelling headline</div>
+                                    <div class="fb-link-desc" id="fb-mobile-desc">Short supporting copy</div>
+                                </div>
+                                <button class="fb-cta" id="fb-mobile-cta">Learn More</button>
+                            </div>
+                            <div class="fb-actions">
+                                <button class="fb-action">👍 Like</button>
+                                <button class="fb-action">💬 Comment</button>
+                                <button class="fb-action">↗️ Share</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instagram Mobile Feed -->
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div class="preview-platform">
+                            <div class="platform-icon ig-icon"></div>
+                            <span>Instagram Mobile Feed</span>
+                        </div>
+                    </div>
+                    <div class="preview-content">
+                        <div class="ad-preview instagram-feed">
+                            <div class="ig-header">
+                                <div class="ig-avatar" id="ig-mobile-avatar"></div>
+                                <div>
+                                    <div class="ig-username" id="ig-mobile-username">yourbrand</div>
+                                    <div class="ig-sponsored">Sponsored</div>
+                                </div>
+                                <div class="ig-options">⋯</div>
+                            </div>
+                            <div class="ig-media" id="ig-mobile-media">[Ad Creative]</div>
+                            <div class="ig-cta-overlay">
+                                <button class="ig-cta-btn" id="ig-mobile-cta">Learn More ›</button>
+                            </div>
+                            <div class="ig-actions">
+                                <button class="ig-action">🤍</button>
+                                <button class="ig-action">💬</button>
+                                <button class="ig-action">📤</button>
+                                <button class="ig-action" style="margin-left: auto;">🔖</button>
+                            </div>
+                            <div class="ig-content">
+                                <div class="ig-likes">89 views</div>
+                                <div class="ig-caption"><strong id="ig-mobile-brand">yourbrand</strong> <span id="ig-mobile-text">Tell people what you're promoting...</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Facebook Desktop Feed -->
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div class="preview-platform">
+                            <div class="platform-icon fb-icon"></div>
+                            <span>Facebook Desktop Feed</span>
+                        </div>
+                    </div>
+                    <div class="preview-content">
+                        <div class="ad-preview facebook-feed">
+                            <div class="fb-header">
+                                <div class="fb-avatar" id="fb-desktop-avatar"></div>
+                                <div class="fb-meta">
+                                    <div class="fb-brand" id="fb-desktop-brand">Your Brand</div>
+                                    <div class="fb-sponsored">
+                                        Sponsored · 
+                                        <svg class="globe-icon" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0a8 8 0 100 16A8 8 0 008 0zm6 8a5.97 5.97 0 01-1.057 3.386A7.44 7.44 0 0013 11H9V9h5.917zM7 7V1.051A6.01 6.01 0 003 3c-.61.61-1.12 1.333-1.49 2.127L7 7zm2-5.917A6.006 6.006 0 0112.949 7H9V1.083zM7 9v2H3c-.345 0-.68.036-1 .104A6.002 6.002 0 007 2.083V9zm2 2h3.95A6.01 6.01 0 019 13.95V11z"></path></svg>
+                                    </div>
+                                </div>
+                                <div class="fb-options">⋯</div>
+                            </div>
+                            <div class="fb-text" id="fb-desktop-text">Tell people what you're promoting in 125 chars or less</div>
+                            <div class="fb-media" id="fb-desktop-media">[Ad Creative]</div>
+                            <div class="fb-link-card">
+                                <div class="fb-link-info">
+                                    <div class="fb-link-domain" id="fb-desktop-domain">example.com</div>
+                                    <div class="fb-link-title" id="fb-desktop-headline">Compelling headline</div>
+                                    <div class="fb-link-desc" id="fb-desktop-desc">Short supporting copy</div>
+                                </div>
+                                <button class="fb-cta" id="fb-desktop-cta">Learn More</button>
+                            </div>
+                            <div class="fb-actions">
+                                <button class="fb-action">👍 Like</button>
+                                <button class="fb-action">💬 Comment</button>
+                                <button class="fb-action">↗️ Share</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">Stories & Reels</h2>
+            <div class="previews-grid">
+                <!-- Facebook Story -->
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div class="preview-platform">
+                            <div class="platform-icon fb-icon"></div>
+                            <span>Facebook Story</span>
+                        </div>
+                    </div>
+                    <div class="preview-content">
+                        <div class="ad-preview story-reel story-bg-fb">
+                            <div class="story-content">
+                                <div class="story-header">
+                                    <div class="story-avatar" id="fb-story-avatar"></div>
+                                    <div>
+                                        <div class="story-brand" id="fb-story-brand">Your Brand</div>
+                                        <div class="story-sponsored">Sponsored</div>
+                                    </div>
+                                </div>
+                                <div class="story-footer">
+                                    <div class="story-text" id="fb-story-text">Tell people what you're promoting...</div>
+                                    <button class="story-cta" id="fb-story-cta">Learn More</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instagram Story -->
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div class="preview-platform">
+                            <div class="platform-icon ig-icon"></div>
+                            <span>Instagram Story</span>
+                        </div>
+                    </div>
+                    <div class="preview-content">
+                        <div class="ad-preview story-reel story-bg-ig">
+                            <div class="story-content">
+                                <div class="story-header">
+                                    <div class="story-avatar" id="ig-story-avatar"></div>
+                                    <div>
+                                        <div class="story-brand" id="ig-story-username">yourbrand</div>
+                                        <div class="story-sponsored">Sponsored</div>
+                                    </div>
+                                </div>
+                                <div class="story-footer">
+                                    <div class="story-text" id="ig-story-text">Tell people what you're promoting...</div>
+                                    <button class="story-cta" id="ig-story-cta">Learn More</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instagram Reel -->
+                <div class="preview-card">
+                    <div class="preview-header">
+                        <div class="preview-platform">
+                            <div class="platform-icon ig-icon"></div>
+                            <span>Instagram Reel</span>
+                        </div>
+                    </div>
+                    <div class="preview-content">
+                        <div class="ad-preview story-reel story-bg-ig">
+                            <div class="story-content">
+                                <div class="story-header">
+                                    <div class="story-avatar" id="ig-reel-avatar"></div>
+                                    <div>
+                                        <div class="story-brand" id="ig-reel-username">yourbrand</div>
+                                        <div class="story-sponsored">Sponsored</div>
+                                    </div>
+                                </div>
+                                <div class="story-footer">
+                                    <div class="story-text" id="ig-reel-text">Tell people what you're promoting...</div>
+                                    <button class="story-cta" id="ig-reel-cta">Learn More</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note">
+            Note: Visual approximation for planning only. Actual ad appearance may vary.
+        </div>
+    </div>
+
+    <script>
+        // Function to get URL parameters
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                postText: params.get('postText') || 'Tell people what you\'re promoting in 125 chars or less',
+                headline: params.get('headline') || 'Compelling headline',
+                description: params.get('description') || 'Short supporting copy',
+                displayLink: params.get('displayLink') || 'example.com',
+                cta: params.get('cta') || 'Learn More',
+                brandName: params.get('brandName') || 'Your Brand',
+                instagramBrandName: params.get('instagramBrandName') || params.get('brandName') || 'Your Brand',
+                brandHandle: params.get('brandHandle') || '@yourbrand',
+                avatarUrl: params.get('avatarUrl') || '',
+                imageUrl: params.get('imageUrl') || ''
+            };
+        }
+
+        // Update all preview elements with data
+        function updatePreviews() {
+            const data = getUrlParams();
+            
+            // Update Facebook previews
+            const fbBrandElements = ['fb-mobile-brand', 'fb-desktop-brand', 'fb-story-brand'];
+            fbBrandElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = data.brandName;
+            });
+
+            const fbTextElements = ['fb-mobile-text', 'fb-desktop-text', 'fb-story-text'];
+            fbTextElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = data.postText;
+            });
+
+            const fbHeadlineElements = ['fb-mobile-headline', 'fb-desktop-headline'];
+            fbHeadlineElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = data.headline;
+            });
+
+            const fbDescElements = ['fb-mobile-desc', 'fb-desktop-desc'];
+            fbDescElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = data.description;
+            });
+
+            const fbDomainElements = ['fb-mobile-domain', 'fb-desktop-domain'];
+            fbDomainElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = data.displayLink;
+            });
+
+            const fbCtaElements = ['fb-mobile-cta', 'fb-desktop-cta', 'fb-story-cta'];
+            fbCtaElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = data.cta;
+            });
+
+            // Update Instagram previews - brand names
+            const igBrandElements = ['ig-mobile-brand'];
+            igBrandElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = data.instagramBrandName;
+            });
+
+            // Update Instagram previews - usernames  
+            const igUsernameElements = ['ig-mobile-username', 'ig-story-username', 'ig-reel-username'];
+            igUsernameElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = data.brandHandle.replace('@', '');
+            });
+
+            const igTextElements = ['ig-mobile-text', 'ig-story-text', 'ig-reel-text'];
+            igTextElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = data.postText;
+            });
+
+            const igCtaElements = ['ig-mobile-cta', 'ig-story-cta', 'ig-reel-cta'];
+            igCtaElements.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = data.cta + ' ›';
+            });
+
+            // Update avatars if URL provided
+            if (data.avatarUrl) {
+                const avatarElements = document.querySelectorAll('.fb-avatar, .ig-avatar, .story-avatar');
+                avatarElements.forEach(el => {
+                    el.style.backgroundImage = `url(${data.avatarUrl})`;
+                });
+            }
+
+            // Update media if URL provided
+            if (data.imageUrl) {
+                const mediaElements = document.querySelectorAll('.fb-media, .ig-media');
+                mediaElements.forEach(el => {
+                    el.innerHTML = `<img src="${data.imageUrl}" alt="Ad Creative">`;
+                });
+
+                // Update story/reel backgrounds
+                const storyElements = document.querySelectorAll('.story-reel');
+                storyElements.forEach(el => {
+                    el.style.backgroundImage = `url(${data.imageUrl})`;
+                    el.style.backgroundSize = 'cover';
+                    el.style.backgroundPosition = 'center';
+                });
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', updatePreviews);
+    </script>
+</body>
+</html>

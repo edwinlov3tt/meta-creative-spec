@@ -1,0 +1,20 @@
+Timestamp,Status,Context,"Page ID",Name,"Picture URL","Page URL",Method,Error,"IP Address"
+"2025-08-17 01:22:31",SUCCESS,,15087023444,Nike,https://scontent-lax3-2.xx.fbcdn.net/v/t39.30808-1/347632633_806437687574050_5273940193516970644_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=1&ccb=1-7&_nc_sid=f4b9fd&_nc_ohc=qTUQ5RvqZzgQ7kNvgFy4vLX&_nc_zt=24&_nc_ht=scontent-lax3-2.xx&_nc_gid=ANDsAbRBhqQEtOlIdVKe9FK&oh=00_AYBr2xLqE61DiV8cjMOGdCT7OJzOdHnGQP3_EHfLy3iCBg&oe=67437C91,https://www.facebook.com/nike/,graph_api_test,,::1
+"2025-08-17 01:22:51",SUCCESS,,15087023444,Nike,https://scontent-lax3-2.xx.fbcdn.net/v/t39.30808-1/347632633_806437687574050_5273940193516970644_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=1&ccb=1-7&_nc_sid=f4b9fd&_nc_ohc=qTUQ5RvqZzgQ7kNvgFy4vLX&_nc_zt=24&_nc_ht=scontent-lax3-2.xx&_nc_gid=ANDsAbRBhqQEtOlIdVKe9FK&oh=00_AYBr2xLqE61DiV8cjMOGdCT7OJzOdHnGQP3_EHfLy3iCBg&oe=67437C91,https://www.facebook.com/nike/,graph_api_test,,::1
+"2025-08-17 01:26:14",SUCCESS,,15087023444,Nike,https://scontent-lax3-2.xx.fbcdn.net/v/t39.30808-1/347632633_806437687574050_5273940193516970644_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=1&ccb=1-7&_nc_sid=f4b9fd&_nc_ohc=qTUQ5RvqZzgQ7kNvgFy4vLX&_nc_zt=24&_nc_ht=scontent-lax3-2.xx&_nc_gid=ANDsAbRBhqQEtOlIdVKe9FK&oh=00_AYBr2xLqE61DiV8cjMOGdCT7OJzOdHnGQP3_EHfLy3iCBg&oe=67437C91,https://www.facebook.com/nike/,graph_api_test,,::1
+"2025-08-17 01:29:26",SUCCESS,,,Kellerhhp,https://graph.facebook.com/kellerhhp/picture?type=large,https://www.facebook.com/kellerhhp,url_parsing,,::1
+"2025-08-17 01:29:39",SUCCESS,,,Kellerhhp,https://graph.facebook.com/kellerhhp/picture?type=large,https://www.facebook.com/kellerhhp,url_parsing,,::1
+"2025-08-17 01:29:47",SUCCESS,,,Kellerhhp,https://graph.facebook.com/kellerhhp/picture?type=large,https://www.facebook.com/kellerhhp,url_parsing,,::1
+"2025-08-17 01:35:44",SUCCESS,,,Cubecarpentry,https://graph.facebook.com/cubecarpentry/picture?type=large,https://www.facebook.com/cubecarpentry/,url_parsing,,47.204.237.128
+"2025-08-17 01:35:46",SUCCESS,,,Cubecarpentry,https://graph.facebook.com/cubecarpentry/picture?type=large,https://www.facebook.com/cubecarpentry/,url_parsing,,47.204.237.128
+"2025-08-17 02:36:55",SUCCESS,,,Reedscontracting21,https://graph.facebook.com/reedscontracting21/picture?type=large,https://www.facebook.com/reedscontracting21,url_parsing,,47.204.237.128
+"2025-08-17 03:29:57",SUCCESS,,,GrandRapidsPD,https://graph.facebook.com/GrandRapidsPD/picture?type=large,https://www.facebook.com/GrandRapidsPD/,url_parsing,,47.204.237.128
+"2025-08-17 03:30:00",SUCCESS,,,GrandRapidsPD,https://graph.facebook.com/GrandRapidsPD/picture?type=large,https://www.facebook.com/GrandRapidsPD/,url_parsing,,47.204.237.128
+"2025-08-17 03:30:03",SUCCESS,,,GrandRapidsPD,https://graph.facebook.com/GrandRapidsPD/picture?type=large,https://www.facebook.com/GrandRapidsPD/,url_parsing,,47.204.237.128
+"2025-08-17 03:30:20",SUCCESS,,,GrandRapidsPD,https://graph.facebook.com/GrandRapidsPD/picture?type=large,https://www.facebook.com/GrandRapidsPD/,url_parsing,,47.204.237.128
+"2025-08-17 03:30:51",SUCCESS,,,GrandRapidsPD,https://graph.facebook.com/GrandRapidsPD/picture?type=large,https://www.facebook.com/GrandRapidsPD/,url_parsing,,47.204.237.128
+"2025-08-17 03:30:52",SUCCESS,,,GrandRapidsPD,https://graph.facebook.com/GrandRapidsPD/picture?type=large,https://www.facebook.com/GrandRapidsPD/,url_parsing,,47.204.237.128
+"2025-08-17 03:30:52",SUCCESS,,,GrandRapidsPD,https://graph.facebook.com/GrandRapidsPD/picture?type=large,https://www.facebook.com/GrandRapidsPD/,url_parsing,,47.204.237.128
+"2025-08-18 20:18:33",SUCCESS,,,cubecarpentry,https://graph.facebook.com/cubecarpentry/picture?type=large,https://www.facebook.com/cubecarpentry/#,url_parsing,,47.204.237.128
+"2025-08-18 20:18:34",SUCCESS,,,cubecarpentry,https://graph.facebook.com/cubecarpentry/picture?type=large,https://www.facebook.com/cubecarpentry/#,url_parsing,,47.204.237.128
+"2025-08-18 20:18:42",SUCCESS,,,cubecarpentry,https://graph.facebook.com/cubecarpentry/picture?type=large,https://www.facebook.com/cubecarpentry/#,url_parsing,,47.204.237.128

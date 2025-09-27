@@ -1,0 +1,129 @@
+Looking at your screenshots and code samples, I can see you want to recreate Meta's comprehensive ad previewer. Let me break down exactly what you're asking for and what needs to be implemented:
+Current State vs. Target State
+Your Current App Has:
+
+Single preview with basic platform/device/type toggles
+Simple chip-based controls
+One preview container showing Facebook-style ads
+
+Meta's Previewer Has:
+
+Grid layout with multiple simultaneous previews
+Categorized sections (Feeds, Stories & Reels, In-stream ads, etc.)
+Modal "View Preview" with dropdown switcher
+Precise pixel-perfect ad layouts
+
+Detailed Requirements Breakdown
+1. Full Previewer Grid Layout
+Replace your single preview with a comprehensive grid showing:
+Categories to implement:
+
+Feeds: Facebook Feed, Instagram Feed, Facebook Video feeds, Facebook Right column, Instagram Explore Feed
+Stories and Reels: Instagram Stories, Facebook Stories, Messenger Stories, Instagram Reels, Facebook Reels
+In-stream ads: Facebook In-stream videos
+Search results: Facebook Marketplace Search
+
+Layout specifications:
+
+6-column grid with 24px gaps
+Each preview card: 250px width × 488px height
+Category headers with section spacing
+Responsive grid that collapses on smaller screens
+
+2. View Preview Modal System
+Create a full-screen modal that:
+
+Opens when clicking any grid preview or the new "expand" button
+Shows enlarged single preview (same content as grid, but bigger)
+Has dropdown at top-left to switch between placements
+Includes close button (×) at top-right
+Dark overlay background
+Modal should be 80% of screen width/height, centered
+
+3. Enhanced Preview Controls
+Modify your existing Preview Controls section:
+Add dropdown selector:
+
+Place directly under "Preview Controls" heading
+Dropdown should list all available placements
+When selected, automatically updates your existing chip controls
+Should sync bidirectionally with chips
+
+Add expand button:
+
+Place to the right of "Preview Controls" heading
+Icon: expand/fullscreen symbol
+Clicking opens View Preview modal
+
+4. Zoom Controls Bar
+At bottom of preview section, next to your existing note:
+
+Zoom Out button (- icon)
+Zoom In button (+ icon)
+Expand to Full Previewer button
+Should affect the preview scaling
+
+5. Pixel-Perfect Ad Layouts
+This is the most complex part. You need to recreate exact Meta ad layouts:
+Facebook Feed Layout:
+
+Profile image (40px circle)
+Brand name + "Sponsored" + privacy icon
+Post text with proper line-height
+Image with exact aspect ratios
+Link card with domain/headline/description
+CTA button with proper styling
+Like/Comment/Share buttons
+
+Instagram Feed Layout:
+
+Different header layout
+CTA button over image
+Action buttons (heart, comment, share, bookmark)
+"View all comments" text
+
+Stories/Reels Layouts:
+
+9:16 vertical format
+Overlay text and buttons
+Progress bars at top
+Different background gradients
+
+Implementation Strategy
+Phase 1: Structure Setup
+
+Create new components for Full Previewer and View Preview modal
+Implement grid layout system
+Add modal overlay system
+Create dropdown component that syncs with existing chips
+
+Phase 2: Ad Layout Recreation
+
+Study the provided HTML/CSS from Meta's actual previewer
+Create component for each ad placement type
+Implement proper typography (likely need to match Meta's fonts)
+Add proper spacing, colors, and interactive elements
+Ensure responsive behavior
+
+Phase 3: Enhanced Controls
+
+Add zoom functionality
+Implement expand/collapse behaviors
+Create seamless transitions between views
+Add keyboard navigation support
+
+Technical Challenges to Address
+Font Matching: Meta uses specific fonts that may need web font loading
+Icon Accuracy: Need exact Meta icons (Like, Comment, Share, etc.)
+Color Precision: Must match Meta's exact color schemes
+Spacing/Alignment: Pixel-perfect matching of Meta's layouts
+Responsive Behavior: Ensure previews work across different screen sizes
+Performance: Grid with multiple previews needs optimization
+
+The platform restrictions are HTML, JS, CSS, and PHP - we are use Siteground.
+
+I'd like the keep the same react-like design as meta and how my app currently looks keep it consistent
+
+Review the text file in font.txt to see fonts
+
+Lets create a separate test application first

@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meta Ad Previewer - Test Application</title>
+    <style>
+        /* Import fonts */
+        @font-face {
+            font-family: 'Bricolage Grotesque';
+            font-style: normal;
+            font-weight: 200 800;
+            src: url(https://cdn.dvmgc.com/fonts/v1/bricolagegrotesque/W4k3Yu9VX9QW32RAqmhULP.ttf);
+        }
+
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 400;
+            src: url(https://cdn.dvmgc.com/fonts/v1/roboto/UR6N6UsH6sWhXYtA9qWfXr.ttf);
+        }
+
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 700;
+            src: url(https://cdn.dvmgc.com/fonts/v1/roboto/UR6N6UsH6sWhXYtA9qWfXr.ttf);
+        }
+
+        /* Sprite System */
+        .ap-icon {
+            background-image: url('./sprites/XOvOI4QDugg.png');
+            background-repeat: no-repeat;
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+        }
+
+        /* Social Media Icons */
+        .ap-icon-like {
+            background-position: -2px -106px;
+            width: 18px;
+            height: 18px;
+        }
+
+        .ap-icon-comment {
+            background-position: -2px -149px;
+            width: 18px;
+            height: 18px;
+        }
+
+        .ap-icon-share {
+            background-position: -2px -170px;
+            width: 18px;
+            height: 18px;
+        }
+
+        .ap-icon-heart {
+            background-position: -2px -106px;
+            width: 24px;
+            height: 24px;
+        }
+
+        .ap-icon-send {
+            background-position: -2px -170px;
+            width: 24px;
+            height: 24px;
+        }
+
+        .ap-icon-bookmark {
+            background-position: -2px -191px;
+            width: 24px;
+            height: 24px;
+        }
+
+        .ap-icon-ellipsis {
+            background-position: -2px -2px;
+            width: 20px;
+            height: 20px;
+        }
+
+        .ap-icon-globe {
+            background-position: -2px -85px;
+            width: 12px;
+            height: 12px;
+        }
+
+        /* Icon color adjustments */
+        .fb-action .ap-icon {
+            filter: brightness(0) saturate(100%) invert(42%) sepia(7%) saturate(355%) hue-rotate(201deg) brightness(94%) contrast(91%);
+        }
+
+        .ig-action .ap-icon {
+            filter: brightness(0) saturate(100%) invert(0%) sepia(0%) saturate(7500%) hue-rotate(222deg) brightness(100%) contrast(100%);
+        }
+
+        /* Design tokens */
+        :root {
+            --bg: 0 0% 100%;
+            --fg: 240 10% 3.9%;
+            --muted: 240 3.8% 46%;
+            --border: 240 5% 84%;
+            --card: 0 0% 100%;
+            --card-contrast: 240 5% 96%;
+            --ring: 221 83% 53%;
+            --accent: 221 83% 53%;
+            --radius: 14px;
+            --shadow: 0 10px 20px rgba(2,6,23,.06), 0 2px 6px rgba(2,6,23,.06);
+            
+            /* Meta colors */
+            --meta-bg: #f0f2f5;
+            --meta-secondary: #65676b;
+            --meta-blue: #1877F2;
+            --meta-border: #dddfe2;
+        }
+
+        * { box-sizing: border-box; }
+        
+        body {
+            margin: 0;
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: hsl(240 5% 96%);
+            color: hsl(var(--fg));
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+
+        .title {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .controls-section {
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .controls-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .controls-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .btn {
+            background: hsl(var(--accent));
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: hsl(var(--card-contrast));
+            color: hsl(var(--fg));
+            border: 1px solid hsl(var(--border));
+        }
+
+        .preview-dropdown {
+            width: 100%;
+            max-width: 300px;
+            padding: 10px 12px;
+            border: 1px solid hsl(var(--border));
+            border-radius: 8px;
+            background: white;
+            font: inherit;
+        }
+
+        .grid-container {
+            display: grid;
+            gap: 24px;
+        }
+
+        .section {
+            margin-bottom: 48px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 20px 0;
+            color: rgba(0, 0, 0, 0.75);
+        }
+
+        .previews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            max-width: 100%;
+        }
+
+        .preview-card {
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .preview-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .preview-header {
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+
+        .preview-platform {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .platform-icon {
+            width: 20px;
+            height: 20px;
+            background: var(--meta-blue);
+            border-radius: 4px;
+        }
+
+        .preview-content {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.03);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+        }
+
+        /* Ad layout styles */
+        .ad-preview {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 100%;
+        }
+
+        .facebook-feed {
+            width: 320px;
+            font-size: 14px;
+        }
+
+        .instagram-feed {
+            width: 320px;
+            font-size: 14px;
+        }
+
+        .story-reel {
+            width: 200px;
+            height: 356px;
+            background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d);
+            position: relative;
+            border-radius: 12px;
+        }
+
+        /* Facebook Feed Layout */
+        .fb-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            gap: 8px;
+        }
+
+        .fb-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ddd;
+        }
+
+        .fb-meta {
+            flex: 1;
+        }
+
+        .fb-brand {
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .fb-sponsored {
+            color: var(--meta-secondary);
+            font-size: 12px;
+        }
+
+        .fb-options {
+            color: var(--meta-secondary);
+            font-size: 20px;
+        }
+
+        .fb-text {
+            padding: 0 16px 12px;
+            line-height: 1.4;
+        }
+
+        .fb-media {
+            width: 100%;
+            height: 200px;
+            background: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #65676b;
+        }
+
+        .fb-link-card {
+            border-top: 1px solid var(--meta-border);
+            padding: 12px 16px;
+            background: var(--meta-bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .fb-link-info {
+            flex: 1;
+        }
+
+        .fb-link-domain {
+            font-size: 12px;
+            color: var(--meta-secondary);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .fb-link-title {
+            font-weight: 700;
+            font-size: 16px;
+            margin: 2px 0;
+        }
+
+        .fb-link-desc {
+            font-size: 13px;
+            color: var(--meta-secondary);
+        }
+
+        .fb-cta {
+            background: #e4e6ea;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .fb-actions {
+            display: flex;
+            border-top: 1px solid #e4e6ea;
+            margin-top: 8px;
+        }
+
+        .fb-action {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            color: var(--meta-secondary);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .fb-action:hover {
+            background: rgba(0,0,0,0.05);
+        }
+
+        /* Instagram Feed Layout */
+        .ig-header {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-bottom: 1px solid #efefef;
+        }
+
+        .ig-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #ddd;
+            margin-right: 12px;
+        }
+
+        .ig-username {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .ig-sponsored {
+            font-size: 12px;
+            color: #8e8e8e;
+        }
+
+        .ig-options {
+            margin-left: auto;
+            font-size: 16px;
+            color: #262626;
+        }
+
+        .ig-media {
+            width: 100%;
+            height: 200px;
+            background: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #65676b;
+        }
+
+        .ig-cta-overlay {
+            position: relative;
+            border-top: 1px solid #efefef;
+            padding: 10px 16px;
+        }
+
+        .ig-cta-btn {
+            background: none;
+            border: none;
+            font-weight: 700;
+            color: #0095f6;
+            cursor: pointer;
+        }
+
+        .ig-actions {
+            display: flex;
+            padding: 8px 16px;
+            gap: 16px;
+        }
+
+        .ig-action {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .ig-content {
+            padding: 0 16px 16px;
+        }
+
+        .ig-likes {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .ig-caption {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        /* Story/Reel Layout */
+        .story-content {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 16px;
+            color: white;
+        }
+
+        .story-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .story-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+        }
+
+        .story-brand {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .story-sponsored {
+            font-size: 10px;
+            opacity: 0.8;
+        }
+
+        .story-footer {
+            text-align: center;
+        }
+
+        .story-text {
+            font-size: 14px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .story-cta {
+            background: rgba(255,255,255,0.9);
+            color: #262626;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .modal-body {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .zoom-btn {
+            background: hsl(var(--card-contrast));
+            border: 1px solid hsl(var(--border));
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .note {
+            font-size: 12px;
+            color: hsl(var(--muted));
+            margin-top: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .previews-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Meta Ad Previewer</h1>
+            <div style="display: flex; gap: 12px;">
+                <button class="btn btn-secondary" onclick="resetPreviews()">Reset</button>
+                <button class="btn" onclick="exportPreview()">Export</button>
+            </div>
+        </div>
+
+        <div class="controls-section">
+            <div class="controls-header">
+                <h2 class="controls-title">Preview Controls</h2>
+                <button class="btn" onclick="openModal()">⛶ Expand Preview</button>
+            </div>
+            
+            <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 250px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px;">
+                        Select Placement:
+                    </label>
+                    <select class="preview-dropdown" id="placementSelect" onchange="updatePreview()">
+                        <option value="facebook-mobile-feed">Facebook - Mobile Feed</option>
+                        <option value="facebook-desktop-feed">Facebook - Desktop Feed</option>
+                        <option value="instagram-mobile-feed">Instagram - Mobile Feed</option>
+                        <option value="instagram-desktop-feed">Instagram - Desktop Feed</option>
+                        <option value="instagram-reels">Instagram - Reels</option>
+                        <option value="facebook-reels">Facebook - Reels</option>
+                        <option value="instagram-mobile-stories">Instagram - Mobile Stories</option>
+                        <option value="instagram-desktop-stories">Instagram - Desktop Stories</option>
+                        <option value="facebook-stories">Facebook - Stories</option>
+                    </select>
+                </div>
+                
+                <div class="zoom-controls">
+                    <button class="zoom-btn" onclick="zoomOut()">−</button>
+                    <button class="zoom-btn" onclick="zoomIn()">+</button>
+                    <button class="zoom-btn" onclick="toggleFullGrid()">⛶</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="singlePreview" style="display: none;">
+            <div class="previews-grid" style="grid-template-columns: 1fr; max-width: 400px; margin: 0 auto;">
+                <div class="preview-card">
+                    <div class="preview-content" id="singlePreviewContent">
+                        <!-- Single preview content will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="fullGrid">
+            <div class="section">
+                <h2 class="section-title">Feeds</h2>
+                <div class="previews-grid">
+                    <div class="preview-card" onclick="selectPreview('facebook-mobile-feed')">
+                        <div class="preview-header">
+                            <div class="preview-platform">
+                                <div class="platform-icon" style="background: #1877F2;"></div>
+                                <div>
+                                    <div style="color: rgba(0, 0, 0, 0.55);">Facebook</div>
+                                    <div style="color: rgba(0, 0, 0, 0.75);">Mobile Feed</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="preview-content">
+                            <div class="ad-preview facebook-feed">
+                                <div class="fb-header">
+                                    <div class="fb-avatar"></div>
+                                    <div class="fb-meta">
+                                        <div class="fb-brand">Your Brand</div>
+                                        <div class="fb-sponsored">Sponsored · <i class="ap-icon ap-icon-globe"></i></div>
+                                    </div>
+                                    <div class="fb-options"><i class="ap-icon ap-icon-ellipsis"></i></div>
+                                </div>
+                                <div class="fb-text">Tell people what you're promoting in 125 chars or less</div>
+                                <div class="fb-media">[Ad Creative]</div>
+                                <div class="fb-link-card">
+                                    <div class="fb-link-info">
+                                        <div class="fb-link-domain">example.com</div>
+                                        <div class="fb-link-title">Compelling headline</div>
+                                        <div class="fb-link-desc">Short supporting copy</div>
+                                    </div>
+                                    <button class="fb-cta">Learn More</button>
+                                </div>
+                                <div class="fb-actions">
+                                    <button class="fb-action"><i class="ap-icon ap-icon-like"></i> Like</button>
+                                    <button class="fb-action"><i class="ap-icon ap-icon-comment"></i> Comment</button>
+                                    <button class="fb-action"><i class="ap-icon ap-icon-share"></i> Share</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preview-card" onclick="selectPreview('facebook-desktop-feed')">
+                        <div class="preview-header">
+                            <div class="preview-platform">
+                                <div class="platform-icon" style="background: #1877F2;"></div>
+                                <div>
+                                    <div style="color: rgba(0, 0, 0, 0.55);">Facebook</div>
+                                    <div style="color: rgba(0, 0, 0, 0.75);">Desktop Feed</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="preview-content">
+                            <div class="ad-preview facebook-feed" style="width: 400px;">
+                                <div class="fb-header">
+                                    <div class="fb-avatar"></div>
+                                    <div class="fb-meta">
+                                        <div class="fb-brand">Your Brand</div>
+                                        <div class="fb-sponsored">Sponsored · <i class="ap-icon ap-icon-globe"></i></div>
+                                    </div>
+                                    <div class="fb-options"><i class="ap-icon ap-icon-ellipsis"></i></div>
+                                </div>
+                                <div class="fb-text">Tell people what you're promoting in 125 chars or less</div>
+                                <div class="fb-media" style="height: 250px;">[Ad Creative]</div>
+                                <div class="fb-link-card">
+                                    <div class="fb-link-info">
+                                        <div class="fb-link-domain">example.com</div>
+                                        <div class="fb-link-title">Compelling headline</div>
+                                        <div class="fb-link-desc">Short supporting copy</div>
+                                    </div>
+                                    <button class="fb-cta">Learn More</button>
+                                </div>
+                                <div class="fb-actions">
+                                    <button class="fb-action"><i class="ap-icon ap-icon-like"></i> Like</button>
+                                    <button class="fb-action"><i class="ap-icon ap-icon-comment"></i> Comment</button>
+                                    <button class="fb-action"><i class="ap-icon ap-icon-share"></i> Share</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preview-card" onclick="selectPreview('instagram-mobile-feed')">
+                        <div class="preview-header">
+                            <div class="preview-platform">
+                                <div class="platform-icon" style="background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d);"></div>
+                                <div>
+                                    <div style="color: rgba(0, 0, 0, 0.55);">Instagram</div>
+                                    <div style="color: rgba(0, 0, 0, 0.75);">Mobile Feed</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="preview-content">
+                            <div class="ad-preview instagram-feed">
+                                <div class="ig-header">
+                                    <div class="ig-avatar"></div>
+                                    <div>
+                                        <div class="ig-username">yourbrand</div>
+                                        <div class="ig-sponsored">Sponsored</div>
+                                    </div>
+                                    <div class="ig-options"><i class="ap-icon ap-icon-ellipsis"></i></div>
+                                </div>
+                                <div class="ig-media">[Ad Creative]</div>
+                                <div class="ig-cta-overlay">
+                                    <button class="ig-cta-btn">Learn More ›</button>
+                                </div>
+                                <div class="ig-actions">
+                                    <button class="ig-action"><i class="ap-icon ap-icon-heart"></i></button>
+                                    <button class="ig-action"><i class="ap-icon ap-icon-comment"></i></button>
+                                    <button class="ig-action"><i class="ap-icon ap-icon-send"></i></button>
+                                    <button class="ig-action" style="margin-left: auto;"><i class="ap-icon ap-icon-bookmark"></i></button>
+                                </div>
+                                <div class="ig-content">
+                                    <div class="ig-likes">89 likes</div>
+                                    <div class="ig-caption"><strong>yourbrand</strong> Tell people what you're promoting...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preview-card" onclick="selectPreview('instagram-desktop-feed')">
+                        <div class="preview-header">
+                            <div class="preview-platform">
+                                <div class="platform-icon" style="background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d);"></div>
+                                <div>
+                                    <div style="color: rgba(0, 0, 0, 0.55);">Instagram</div>
+                                    <div style="color: rgba(0, 0, 0, 0.75);">Desktop Feed</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="preview-content">
+                            <div class="ad-preview instagram-feed" style="width: 400px;">
+                                <div class="ig-header">
+                                    <div class="ig-avatar"></div>
+                                    <div>
+                                        <div class="ig-username">yourbrand</div>
+                                        <div class="ig-sponsored">Sponsored</div>
+                                    </div>
+                                    <div class="ig-options"><i class="ap-icon ap-icon-ellipsis"></i></div>
+                                </div>
+                                <div class="ig-media" style="height: 250px;">[Ad Creative]</div>
+                                <div class="ig-cta-overlay">
+                                    <button class="ig-cta-btn">Learn More ›</button>
+                                </div>
+                                <div class="ig-actions">
+                                    <button class="ig-action"><i class="ap-icon ap-icon-heart"></i></button>
+                                    <button class="ig-action"><i class="ap-icon ap-icon-comment"></i></button>
+                                    <button class="ig-action"><i class="ap-icon ap-icon-send"></i></button>
+                                    <button class="ig-action" style="margin-left: auto;"><i class="ap-icon ap-icon-bookmark"></i></button>
+                                </div>
+                                <div class="ig-content">
+                                    <div class="ig-likes">89 likes</div>
+                                    <div class="ig-caption"><strong>yourbrand</strong> Tell people what you're promoting...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Stories and Reels</h2>
+                <div class="previews-grid">
+                    <div class="preview-card" onclick="selectPreview('instagram-reels')">
+                        <div class="preview-header">
+                            <div class="preview-platform">
+                                <div class="platform-icon" style="background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d);"></div>
+                                <div>
+                                    <div style="color: rgba(0, 0, 0, 0.55);">Instagram</div>
+                                    <div style="color: rgba(0, 0, 0, 0.75);">Reels</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="preview-content">
+                            <div class="ad-preview story-reel">
+                                <div class="story-content">
+                                    <div class="story-header">
+                                        <div class="story-avatar"></div>
+                                        <div>
+                                            <div class="story-brand">yourbrand</div>
+                                            <div class="story-sponsored">Sponsored</div>
+                                        </div>
+                                    </div>
+                                    <div class="story-footer">
+                                        <div class="story-text">Tell people what you're promoting...</div>
+                                        <button class="story-cta">Learn More</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preview-card" onclick="selectPreview('facebook-reels')">
+                        <div class="preview-header">
+                            <div class="preview-platform">
+                                <div class="platform-icon" style="background: #1877F2;"></div>
+                                <div>
+                                    <div style="color: rgba(0, 0, 0, 0.55);">Facebook</div>
+                                    <div style="color: rgba(0, 0, 0, 0.75);">Reels</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="preview-content">
+                            <div class="ad-preview story-reel" style="background: linear-gradient(45deg, #1877F2, #42a5f5);">
+                                <div class="story-content">
+                                    <div class="story-header">
+                                        <div class="story-avatar"></div>
+                                        <div>
+                                            <div class="story-brand">Your Brand</div>
+                                            <div class="story-sponsored">Sponsored</div>
+                                        </div>
+                                    </div>
+                                    <div class="story-footer">
+                                        <div class="story-text">Tell people what you're promoting...</div>
+                                        <button class="story-cta">Learn More</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preview-card" onclick="selectPreview('instagram-mobile-stories')">
+                        <div class="preview-header">
+                            <div class="preview-platform">
+                                <div class="platform-icon" style="background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d);"></div>
+                                <div>
+                                    <div style="color: rgba(0, 0, 0, 0.55);">Instagram</div>
+                                    <div style="color: rgba(0, 0, 0, 0.75);">Mobile Stories</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="preview-content">
+                            <div class="ad-preview story-reel">
+                                <div class="story-content">
+                                    <div class="story-header">
+                                        <div class="story-avatar"></div>
+                                        <div>
+                                            <div class="story-brand">yourbrand</div>
+                                            <div class="story-sponsored">Sponsored</div>
+                                        </div>
+                                    </div>
+                                    <div class="story-footer">
+                                        <div class="story-text">Tell people what you're promoting...</div>
+                                        <button class="story-cta">Learn More</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preview-card" onclick="selectPreview('instagram-desktop-stories')">
+                        <div class="preview-header">
+                            <div class="preview-platform">
+                                <div class="platform-icon" style="background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d);"></div>
+                                <div>
+                                    <div style="color: rgba(0, 0, 0, 0.55);">Instagram</div>
+                                    <div style="color: rgba(0, 0, 0, 0.75);">Desktop Stories</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="preview-content">
+                            <div class="ad-preview story-reel" style="width: 240px; height: 426px;">
+                                <div class="story-content">
+                                    <div class="story-header">
+                                        <div class="story-avatar"></div>
+                                        <div>
+                                            <div class="story-brand">yourbrand</div>
+                                            <div class="story-sponsored">Sponsored</div>
+                                        </div>
+                                    </div>
+                                    <div class="story-footer">
+                                        <div class="story-text">Tell people what you're promoting...</div>
+                                        <button class="story-cta">Learn More</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preview-card" onclick="selectPreview('facebook-stories')">
+                        <div class="preview-header">
+                            <div class="preview-platform">
+                                <div class="platform-icon" style="background: #1877F2;"></div>
+                                <div>
+                                    <div style="color: rgba(0, 0, 0, 0.55);">Facebook</div>
+                                    <div style="color: rgba(0, 0, 0, 0.75);">Stories</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="preview-content">
+                            <div class="ad-preview story-reel" style="background: linear-gradient(45deg, #1877F2, #42a5f5);">
+                                <div class="story-content">
+                                    <div class="story-header">
+                                        <div class="story-avatar"></div>
+                                        <div>
+                                            <div class="story-brand">Your Brand</div>
+                                            <div class="story-sponsored">Sponsored</div>
+                                        </div>
+                                    </div>
+                                    <div class="story-footer">
+                                        <div class="story-text">Tell people what you're promoting...</div>
+                                        <button class="story-cta">Learn More</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="note">
+            Note: Visual approximation for planning only.
+        </div>
+    </div>
+
+    <!-- Modal for expanded preview -->
+    <div class="modal-overlay" id="previewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <h3 style="margin: 0;">View Preview</h3>
+                    <select class="preview-dropdown" id="modalPlacementSelect" onchange="updateModalPreview()" style="max-width: 250px;">
+                        <option value="facebook-mobile-feed">📱 Facebook - Mobile Feed</option>
+                        <option value="facebook-desktop-feed">🖥️ Facebook - Desktop Feed</option>
+                        <option value="instagram-mobile-feed">📱 Instagram - Mobile Feed</option>
+                        <option value="instagram-desktop-feed">🖥️ Instagram - Desktop Feed</option>
+                        <option value="instagram-reels">📱 Instagram - Reels</option>
+                        <option value="facebook-reels">📱 Facebook - Reels</option>
+                        <option value="instagram-mobile-stories">📱 Instagram - Mobile Stories</option>
+                        <option value="instagram-desktop-stories">🖥️ Instagram - Desktop Stories</option>
+                        <option value="facebook-stories">📱 Facebook - Stories</option>
+                    </select>
+                </div>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body" id="modalPreviewContent">
+                <!-- Modal content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentZoom = 1;
+        let currentPreview = 'facebook-mobile-feed';
+        let isGridView = true;
+
+        function selectPreview(type) {
+            currentPreview = type;
+            document.getElementById('placementSelect').value = type;
+            updatePreview();
+        }
+
+        function updatePreview() {
+            currentPreview = document.getElementById('placementSelect').value;
+            if (!isGridView) {
+                renderSinglePreview();
+            }
+        }
+
+        function updateModalPreview() {
+            const modalSelect = document.getElementById('modalPlacementSelect');
+            currentPreview = modalSelect.value;
+            document.getElementById('placementSelect').value = currentPreview;
+            renderModalPreview();
+        }
+
+        function renderSinglePreview() {
+            const content = document.getElementById('singlePreviewContent');
+            content.innerHTML = getPreviewHTML(currentPreview, true);
+        }
+
+        function renderModalPreview() {
+            const content = document.getElementById('modalPreviewContent');
+            content.innerHTML = getPreviewHTML(currentPreview, true);
+        }
+
+        function getPreviewHTML(type, isLarge = false) {
+            const scale = isLarge ? 1.2 : 1;
+            
+            switch(type) {
+                case 'facebook-mobile-feed':
+                    return `
+                        <div class="ad-preview facebook-feed" style="transform: scale(${scale});">
+                            <div class="fb-header">
+                                <div class="fb-avatar"></div>
+                                <div class="fb-meta">
+                                    <div class="fb-brand">Your Brand</div>
+                                    <div class="fb-sponsored">Sponsored · <i class="ap-icon ap-icon-globe"></i></div>
+                                </div>
+                                <div class="fb-options"><i class="ap-icon ap-icon-ellipsis"></i></div>
+                            </div>
+                            <div class="fb-text">Tell people what you're promoting in 125 chars or less</div>
+                            <div class="fb-media">[Ad Creative]</div>
+                            <div class="fb-link-card">
+                                <div class="fb-link-info">
+                                    <div class="fb-link-domain">example.com</div>
+                                    <div class="fb-link-title">Compelling headline</div>
+                                    <div class="fb-link-desc">Short supporting copy</div>
+                                </div>
+                                <button class="fb-cta">Learn More</button>
+                            </div>
+                            <div class="fb-actions">
+                                <button class="fb-action"><i class="ap-icon ap-icon-like"></i> Like</button>
+                                <button class="fb-action"><i class="ap-icon ap-icon-comment"></i> Comment</button>
+                                <button class="fb-action"><i class="ap-icon ap-icon-share"></i> Share</button>
+                            </div>
+                        </div>
+                    `;
+                
+                case 'facebook-desktop-feed':
+                    return `
+                        <div class="ad-preview facebook-feed" style="width: 400px; transform: scale(${scale});">
+                            <div class="fb-header">
+                                <div class="fb-avatar"></div>
+                                <div class="fb-meta">
+                                    <div class="fb-brand">Your Brand</div>
+                                    <div class="fb-sponsored">Sponsored · <i class="ap-icon ap-icon-globe"></i></div>
+                                </div>
+                                <div class="fb-options"><i class="ap-icon ap-icon-ellipsis"></i></div>
+                            </div>
+                            <div class="fb-text">Tell people what you're promoting in 125 chars or less</div>
+                            <div class="fb-media" style="height: 250px;">[Ad Creative]</div>
+                            <div class="fb-link-card">
+                                <div class="fb-link-info">
+                                    <div class="fb-link-domain">example.com</div>
+                                    <div class="fb-link-title">Compelling headline</div>
+                                    <div class="fb-link-desc">Short supporting copy</div>
+                                </div>
+                                <button class="fb-cta">Learn More</button>
+                            </div>
+                            <div class="fb-actions">
+                                <button class="fb-action"><i class="ap-icon ap-icon-like"></i> Like</button>
+                                <button class="fb-action"><i class="ap-icon ap-icon-comment"></i> Comment</button>
+                                <button class="fb-action"><i class="ap-icon ap-icon-share"></i> Share</button>
+                            </div>
+                        </div>
+                    `;
+
+                case 'instagram-mobile-feed':
+                    return `
+                        <div class="ad-preview instagram-feed" style="transform: scale(${scale});">
+                            <div class="ig-header">
+                                <div class="ig-avatar"></div>
+                                <div>
+                                    <div class="ig-username">yourbrand</div>
+                                    <div class="ig-sponsored">Sponsored</div>
+                                </div>
+                                <div class="ig-options">⋯</div>
+                            </div>
+                            <div class="ig-media">[Ad Creative]</div>
+                            <div class="ig-cta-overlay">
+                                <button class="ig-cta-btn">Learn More ›</button>
+                            </div>
+                            <div class="ig-actions">
+                                <button class="ig-action">♡</button>
+                                <button class="ig-action">💬</button>
+                                <button class="ig-action">📤</button>
+                                <button class="ig-action" style="margin-left: auto;">🔖</button>
+                            </div>
+                            <div class="ig-content">
+                                <div class="ig-likes">89 likes</div>
+                                <div class="ig-caption"><strong>yourbrand</strong> Tell people what you're promoting...</div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'instagram-desktop-feed':
+                    return `
+                        <div class="ad-preview instagram-feed" style="width: 400px; transform: scale(${scale});">
+                            <div class="ig-header">
+                                <div class="ig-avatar"></div>
+                                <div>
+                                    <div class="ig-username">yourbrand</div>
+                                    <div class="ig-sponsored">Sponsored</div>
+                                </div>
+                                <div class="ig-options">⋯</div>
+                            </div>
+                            <div class="ig-media" style="height: 250px;">[Ad Creative]</div>
+                            <div class="ig-cta-overlay">
+                                <button class="ig-cta-btn">Learn More ›</button>
+                            </div>
+                            <div class="ig-actions">
+                                <button class="ig-action">♡</button>
+                                <button class="ig-action">💬</button>
+                                <button class="ig-action">📤</button>
+                                <button class="ig-action" style="margin-left: auto;">🔖</button>
+                            </div>
+                            <div class="ig-content">
+                                <div class="ig-likes">89 likes</div>
+                                <div class="ig-caption"><strong>yourbrand</strong> Tell people what you're promoting...</div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'instagram-reels':
+                    return `
+                        <div class="ad-preview story-reel" style="transform: scale(${scale});">
+                            <div class="story-content">
+                                <div class="story-header">
+                                    <div class="story-avatar"></div>
+                                    <div>
+                                        <div class="story-brand">yourbrand</div>
+                                        <div class="story-sponsored">Sponsored</div>
+                                    </div>
+                                </div>
+                                <div class="story-footer">
+                                    <div class="story-text">Tell people what you're promoting...</div>
+                                    <button class="story-cta">Learn More</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'facebook-reels':
+                    return `
+                        <div class="ad-preview story-reel" style="background: linear-gradient(45deg, #1877F2, #42a5f5); transform: scale(${scale});">
+                            <div class="story-content">
+                                <div class="story-header">
+                                    <div class="story-avatar"></div>
+                                    <div>
+                                        <div class="story-brand">Your Brand</div>
+                                        <div class="story-sponsored">Sponsored</div>
+                                    </div>
+                                </div>
+                                <div class="story-footer">
+                                    <div class="story-text">Tell people what you're promoting...</div>
+                                    <button class="story-cta">Learn More</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'instagram-mobile-stories':
+                    return `
+                        <div class="ad-preview story-reel" style="transform: scale(${scale});">
+                            <div class="story-content">
+                                <div class="story-header">
+                                    <div class="story-avatar"></div>
+                                    <div>
+                                        <div class="story-brand">yourbrand</div>
+                                        <div class="story-sponsored">Sponsored</div>
+                                    </div>
+                                </div>
+                                <div class="story-footer">
+                                    <div class="story-text">Tell people what you're promoting...</div>
+                                    <button class="story-cta">Learn More</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'instagram-desktop-stories':
+                    return `
+                        <div class="ad-preview story-reel" style="width: 240px; height: 426px; transform: scale(${scale});">
+                            <div class="story-content">
+                                <div class="story-header">
+                                    <div class="story-avatar"></div>
+                                    <div>
+                                        <div class="story-brand">yourbrand</div>
+                                        <div class="story-sponsored">Sponsored</div>
+                                    </div>
+                                </div>
+                                <div class="story-footer">
+                                    <div class="story-text">Tell people what you're promoting...</div>
+                                    <button class="story-cta">Learn More</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'facebook-stories':
+                    return `
+                        <div class="ad-preview story-reel" style="background: linear-gradient(45deg, #1877F2, #42a5f5); transform: scale(${scale});">
+                            <div class="story-content">
+                                <div class="story-header">
+                                    <div class="story-avatar"></div>
+                                    <div>
+                                        <div class="story-brand">Your Brand</div>
+                                        <div class="story-sponsored">Sponsored</div>
+                                    </div>
+                                </div>
+                                <div class="story-footer">
+                                    <div class="story-text">Tell people what you're promoting...</div>
+                                    <button class="story-cta">Learn More</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                default:
+                    return '<div>Preview not found</div>';
+            }
+        }
+
+        function toggleFullGrid() {
+            isGridView = !isGridView;
+            const fullGrid = document.getElementById('fullGrid');
+            const singlePreview = document.getElementById('singlePreview');
+            
+            if (isGridView) {
+                fullGrid.style.display = 'block';
+                singlePreview.style.display = 'none';
+            } else {
+                fullGrid.style.display = 'none';
+                singlePreview.style.display = 'block';
+                renderSinglePreview();
+            }
+        }
+
+        function zoomIn() {
+            currentZoom = Math.min(currentZoom + 0.1, 2);
+            applyZoom();
+        }
+
+        function zoomOut() {
+            currentZoom = Math.max(currentZoom - 0.1, 0.5);
+            applyZoom();
+        }
+
+        function applyZoom() {
+            const previews = document.querySelectorAll('.ad-preview');
+            previews.forEach(preview => {
+                preview.style.transform = `scale(${currentZoom})`;
+            });
+        }
+
+        function openModal() {
+            const modal = document.getElementById('previewModal');
+            const modalSelect = document.getElementById('modalPlacementSelect');
+            modalSelect.value = currentPreview;
+            modal.style.display = 'flex';
+            renderModalPreview();
+        }
+
+        function closeModal() {
+            document.getElementById('previewModal').style.display = 'none';
+        }
+
+        function resetPreviews() {
+            currentZoom = 1;
+            currentPreview = 'facebook-mobile-feed';
+            isGridView = true;
+            document.getElementById('placementSelect').value = currentPreview;
+            document.getElementById('fullGrid').style.display = 'block';
+            document.getElementById('singlePreview').style.display = 'none';
+            applyZoom();
+        }
+
+        function exportPreview() {
+            alert('Export functionality would be implemented here');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('previewModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            resetPreviews();
+        });
+    </script>
+</body>
+</html>

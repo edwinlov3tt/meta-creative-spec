@@ -1,0 +1,67 @@
+<div style="color: rgb(28, 30, 33); font-size: 12px">
+  <div style="width: 320px; overflow: auto; margin: auto">
+    <div style="align-items: flex-start; padding-left: 10px; padding-right: 10px; padding-top: 10px; display: flex; margin-bottom: 12px">
+      <div style="padding-right: 8px; display: flex"><img src="https://scontent-mia3-2.xx.fbcdn.net/v/t39.30808-1/243967272_230937902406249_944659180454051020_n.png?stp=dst-png_s200x200&amp;_nc_cat=105&amp;ccb=1-7&amp;_nc_sid=029d72&amp;_nc_ohc=5X1SZ2KX0FsQ7kNvwGPsiJQ&amp;_nc_oc=AdkRxjG5emFZAX8ZZxZLxGOtvaJkS060rp63H2k5zzdMuMtXWIhJwXXIPtSytgKw8pI&amp;_nc_zt=24&amp;_nc_ht=scontent-mia3-2.xx&amp;_nc_gid=--V1oS5yyyAIp8QeAYU1GQ&amp;oh=00_AfVdP-BUeIOjqYffSMVtHtSOyX8bR2dlQCcGyoozVvMGhA&amp;oe=68A7D0A8" style="width: 40px; height: 40px; border-radius: 50%" /></div>
+      <div style="align-self: center; display: flex">
+        <div style="flex-direction: column; display: flex; width: 100%; min-width: 195px">
+          <span style="color: rgb(29, 33, 41); font-size: 14px; font-weight: 700"><span>Grand Rapids Police Department</span></span>
+          <div style="color: rgb(144, 148, 156); margin-top: -0.3333em">Sponsored · <img src="https://business.facebook.com/images/mobile/privacy/wordmark/everyone.png" style="width: 10px; height: 11px" /></div>
+        </div>
+        <div style="justify-content: flex-end; display: flex; width: 100%; min-width: 55px"><i style='background-image: url("https://static.xx.fbcdn.net/rsrc.php/v4/yW/r/7r3PsbKup0K.png"); background-position: 0px -1684px; background-repeat: no-repeat; background-size: 51px 2400px; display: inline-block; width: 24px; height: 24px'></i><i style='background-image: url("https://static.xx.fbcdn.net/rsrc.php/v4/yT/r/XOvOI4QDugg.png"); background-position: 0px -193px; background-repeat: no-repeat; background-size: 25px 664px; display: inline-block; width: 20px; height: 20px; margin-left: 16px'></i></div>
+      </div>
+    </div>
+    <div style="align-items: stretch; flex-direction: column; justify-content: flex-start; padding-left: 10px; padding-right: 10px; display: flex; margin-top: 8px; margin-bottom: 8px; font-size: 14px; color: rgb(0, 0, 0)">
+      <div>
+        <span>We cover police academy &amp; pay you a salary while you train. Open Enrollment September 5th - 19th!<br /></span>
+      </div>
+    </div>
+    <div style="position: relative; width: 320px; margin-bottom: 8px">
+      <div style="position: relative">
+        <div><img src="https://scontent-mia3-1.xx.fbcdn.net/v/t45.1600-4/532553123_24136010369412958_8651493838088478150_n.jpg?stp=dst-jpg_s640x640_spS444_tt6&amp;_nc_cat=111&amp;ccb=1-7&amp;_nc_sid=c02adf&amp;_nc_ohc=-ij3UWC8snAQ7kNvwGxgu3F&amp;_nc_oc=AdkgRisBA6BhrS51jf73gdxPpsQ98JrpTLeuk1dy0yIK34AtoPIazJwSNA4nsGsIL4c&amp;_nc_zt=1&amp;_nc_ht=scontent-mia3-1.xx&amp;_nc_gid=--V1oS5yyyAIp8QeAYU1GQ&amp;oh=00_AfU3Ege8TG4swFzMyISEx1XY9K4QqyCsV4uwxJJBb5r0oQ&amp;oe=68A7AAE2" style="object-fit: cover; width: 320px; height: 320px; max-width: 100%" /></div>
+        <div style="background-color: rgb(247, 248, 250); align-items: center; justify-content: flex-start; display: flex; min-height: 40px; padding: 12px">
+          <div style="flex-grow: 1; justify-content: space-between; max-height: 60px; overflow: hidden">
+            <div>
+              <div style="width: 100%; font-size: 14px; color: rgb(70, 73, 80); text-transform: lowercase">
+                <span style="text-overflow: ellipsis; max-width: 100%; overflow: hidden"><span>joingrpd.com</span></span>
+              </div>
+              <div style="color: rgb(28, 32, 40); font-size: 16px; font-weight: 700"><span style="width: 100%">Grow Your Career with GRPD</span></div>
+            </div>
+            <div style="color: rgb(70, 73, 80); font-size: 16px"><span style="text-overflow: ellipsis; max-width: 100%; overflow: hidden">Grand Rapids Police is the perfect size, providing you with the support you need for your personal and professional growth.</span></div>
+          </div>
+          <div style="margin-left: 12px; font-size: 16px; color: rgb(8, 8, 9); font-weight: 600">
+            <div style="cursor: pointer; flex-direction: column; justify-content: center; display: inline-flex; width: 100%">
+              <div style="background-color: rgb(226, 229, 233); align-items: center; justify-content: center; padding-left: 12px; padding-right: 12px; display: flex; border-radius: 6px">
+                <div style="align-items: center; justify-content: center; display: flex; margin: calc(-1*3px)">
+                  <div style="align-items: center; display: flex; max-width: 100%; margin: 3px">
+                    <span style="word-break: break-word; max-width: 100%"
+                      ><span style="overflow: visible"><span style="text-overflow: ellipsis; max-width: 100%; overflow: hidden">Apply now</span></span></span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="align-items: flex-start; flex-direction: column; justify-content: flex-start; display: flex; margin-top: 10px">
+      <div style="background-color: rgb(208, 211, 215); width: 300px; height: 1px; margin: auto"></div>
+      <div style="padding-bottom: 2px; padding-left: 10px; padding-right: 10px; padding-top: 8px; width: 300px; color: rgb(97, 103, 112); font-weight: 600">
+        <div style="align-items: flex-start; justify-content: space-around; display: flex">
+          <div style="align-items: flex-start; justify-content: flex-start; display: flex">
+            <div style="color: rgb(255, 255, 255); padding-bottom: 2px; padding-right: 8px"><i style='background-image: url("https://static.xx.fbcdn.net/rsrc.php/v4/y9/r/q2x81-lEMdT.png"); background-position: 0px -294px; background-repeat: no-repeat; background-size: 21px 330px; display: inline-block; width: 18px; height: 18px'></i></div>
+            Like
+          </div>
+          <div style="align-items: flex-start; justify-content: flex-start; display: flex">
+            <div style="color: rgb(255, 255, 255); padding-bottom: 2px; padding-right: 8px"><i style='background-image: url("https://static.xx.fbcdn.net/rsrc.php/v4/yW/r/7r3PsbKup0K.png"); background-position: -21px -2275px; background-repeat: no-repeat; background-size: 51px 2400px; display: inline-block; width: 18px; height: 18px'></i></div>
+            Comment
+          </div>
+          <div style="align-items: flex-start; justify-content: flex-start; display: flex">
+            <div style="color: rgb(255, 255, 255); padding-bottom: 2px; padding-right: 8px"><i style='background-image: url("https://static.xx.fbcdn.net/rsrc.php/v4/yW/r/7r3PsbKup0K.png"); background-position: -19px -2296px; background-repeat: no-repeat; background-size: 51px 2400px; display: inline-block; width: 18px; height: 18px'></i></div>
+            Share
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,708 @@
+import { create } from 'zustand';
+import { devtools, persist } from 'zustand/middleware';
+import { api, ApiError, API_BASE_URL as CREATIVE_API_BASE } from '@/services/api';
+import { fileToBase64 } from '@/utils/file';
+import { toPng, toJpeg } from 'html-to-image';
+import JSZip from 'jszip';
+import { slugify } from '@/utils/slugify';
+import { showToast } from '@/stores/toastStore';
+import type {
+  CreativeStore,
+  CreativeBrief,
+  AdCopyFields,
+  PreviewSettings,
+  UTMParameters,
+  FacebookState,
+  AIState,
+  FacebookPageData,
+  SpecExport
+} from '@/types/creative';
+
+const ensureHttps = (url: string) => {
+  if (!url) return url;
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `https://${url}`;
+};
+
+const deriveFacebookFallback = (facebookUrl: string): FacebookPageData | null => {
+  if (!facebookUrl) return null;
+
+  const normalized = ensureHttps(facebookUrl.trim());
+
+  let parsed: URL;
+  try {
+    parsed = new URL(normalized);
+  } catch (error) {
+    console.warn('Unable to parse Facebook URL for fallback', error);
+    return null;
+  }
+
+  const host = parsed.hostname.toLowerCase();
+  if (!host.includes('facebook.com') && !host.endsWith('fb.com')) {
+    return null;
+  }
+
+  const slugCandidate = parsed.pathname.split('/').filter(Boolean)[0];
+  if (!slugCandidate) return null;
+
+  const slug = slugCandidate.split('?')[0].split('#')[0];
+  if (!slug) return null;
+
+  const readableName = slug
+    .replace(/[-_]+/g, ' ')
+    .split(' ')
+    .filter(Boolean)
+    .map(word => (word.length <= 2 ? word.toUpperCase() : `${word[0].toUpperCase()}${word.slice(1)}`))
+    .join(' ');
+
+  return {
+    page_id: slug,
+    name: readableName || slug,
+    profile_picture: `https://graph.facebook.com/${encodeURIComponent(slug)}/picture?type=large`,
+    url: normalized,
+    method: 'client_url_fallback'
+  } as FacebookPageData;
+};
+
+const base64ToUint8Array = (base64: string) => {
+  const binary = atob(base64);
+  const len = binary.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+};
+
+const dataUrlToUint8Array = (dataUrl: string) => {
+  const parts = dataUrl.split(',');
+  const base64 = parts.length > 1 ? parts[1] : parts[0];
+  return base64ToUint8Array(base64);
+};
+
+const generateSpecSheet = (spec: SpecExport, trackedUrl: string) => {
+  const lines = [
+    'Meta Creative Spec Sheet',
+    '==========================',
+    '',
+    `Ad Name: ${spec.refName || 'Untitled Creative'}`,
+    '',
+    'Primary Text:',
+    spec.postText || '—',
+    '',
+    `Headline: ${spec.headline || '—'}`,
+    `Description: ${spec.description || '—'}`,
+    `CTA: ${spec.cta || '—'}`,
+    '',
+    `Platform: ${spec.platform}`,
+    `Device: ${spec.device}`,
+    `Ad Type: ${spec.adType}`,
+    `Ad Format: ${spec.adFormat}`,
+    '',
+    `Destination URL: ${spec.destinationUrl || '—'}`,
+    `Tracked URL: ${trackedUrl || '—'}`,
+    '',
+    'Meta Details:',
+    `Company Overview: ${spec.meta.company || '—'}`,
+    `Company Info: ${spec.meta.companyInfo || '—'}`,
+    `Campaign Objective: ${spec.meta.objective || '—'}`,
+    `Notes: ${spec.meta.notes || '—'}`,
+    `Facebook Link: ${spec.meta.facebookLink || '—'}`,
+    `Website: ${spec.meta.url || '—'}`,
+  ];
+
+  return lines.join('\n');
+};
+
+const defaultUTM = (): UTMParameters => ({
+  campaign: 'Ignite',
+  medium: 'Facebook',
+  source: 'Townsquare',
+  content: ''
+});
+
+const defaultBrief = (): CreativeBrief => ({
+  facebookLink: '',
+  websiteUrl: '',
+  companyOverview: '',
+  campaignObjective: '',
+  companyInfo: '',
+  additionalInstructions: '',
+  customPrompt: '',
+  salesFormula: '',
+  includeEmoji: true,
+  removeCharacterLimit: false,
+  utm: defaultUTM(),
+  creativeFile: null
+});
+
+const defaultAdCopy = (): AdCopyFields => ({
+  adName: '',
+  primaryText: '',
+  headline: '',
+  description: '',
+  destinationUrl: '',
+  displayLink: '',
+  callToAction: 'Learn More'
+});
+
+const defaultPreview = (): PreviewSettings => ({
+  platform: 'facebook',
+  device: 'desktop',
+  adType: 'feed',
+  adFormat: 'original'
+});
+
+const defaultFacebookState = (): FacebookState => ({
+  pageData: null,
+  verificationStatus: 'idle',
+  error: null
+});
+
+const defaultAIState = (): AIState => ({
+  isGenerating: false,
+  hasGenerated: false,
+  error: null,
+  lastGeneratedAt: null
+});
+
+const AUTOSAVE_STORAGE_KEY = 'meta-creative-autosave-snapshot';
+
+export const useCreativeStore = create<CreativeStore>()(
+  devtools(
+    persist(
+      (set, get) => ({
+        brief: defaultBrief(),
+        adCopy: defaultAdCopy(),
+        preview: defaultPreview(),
+        facebook: defaultFacebookState(),
+        ai: defaultAIState(),
+        autosave: { lastSavedAt: null },
+        isDirty: false,
+        previewNode: null,
+
+        updateBrief: (updates) =>
+          set(state => ({
+            brief: { ...state.brief, ...updates },
+            isDirty: true
+          })),
+
+        updateBriefField: (key, value) =>
+          set(state => ({
+            brief: { ...state.brief, [key]: value },
+            isDirty: true
+          })),
+
+        updateUTM: (updates) =>
+          set(state => ({
+            brief: {
+              ...state.brief,
+              utm: { ...state.brief.utm, ...updates }
+            },
+            isDirty: true
+          })),
+
+        setCreativeFile: (file) =>
+          set(state => ({
+            brief: { ...state.brief, creativeFile: file },
+            isDirty: true
+          })),
+
+        updateAdCopy: (updates) =>
+          set(state => ({
+            adCopy: { ...state.adCopy, ...updates },
+            isDirty: true
+          })),
+
+        updateAdCopyField: (key, value) =>
+          set(state => ({
+            adCopy: { ...state.adCopy, [key]: value },
+            isDirty: true
+          })),
+
+        setPreview: (updates) =>
+          set(state => ({
+            preview: { ...state.preview, ...updates },
+            isDirty: true
+          })),
+
+        setFacebookState: (facebookUpdates) =>
+          set(state => ({
+            facebook: { ...state.facebook, ...facebookUpdates },
+            isDirty: facebookUpdates.pageData !== undefined ? true : state.isDirty
+          })),
+
+        setFacebookPageData: (data) =>
+          set(state => ({
+            facebook: {
+              ...state.facebook,
+              pageData: data,
+              verificationStatus: data ? 'success' : 'idle',
+              error: null
+            },
+            brief: {
+              ...state.brief,
+              companyOverview:
+                state.brief.companyOverview || (data?.intro ?? state.brief.companyOverview),
+              websiteUrl:
+                state.brief.websiteUrl || (data?.website ? ensureHttps(data.website) : state.brief.websiteUrl)
+            },
+            isDirty: true
+          })),
+
+        setAIState: (aiUpdates) =>
+          set(state => ({
+            ai: { ...state.ai, ...aiUpdates }
+          })),
+
+        setPreviewNode: (node) =>
+          set({ previewNode: node ?? null }),
+
+        markDirty: () => set({ isDirty: true }),
+
+        markSaved: (timestamp = Date.now()) =>
+          set({
+            isDirty: false,
+            autosave: { lastSavedAt: timestamp }
+          }),
+
+        resetStore: () =>
+          set({
+            brief: defaultBrief(),
+            adCopy: defaultAdCopy(),
+            preview: defaultPreview(),
+            facebook: defaultFacebookState(),
+            ai: defaultAIState(),
+            autosave: { lastSavedAt: null },
+            isDirty: false
+          }),
+
+        exportSpec: (): SpecExport => {
+          const state = get();
+          const { adCopy, brief, preview, facebook } = state;
+
+          const spec: SpecExport = {
+            refName: adCopy.adName,
+            postText: adCopy.primaryText,
+            headline: adCopy.headline,
+            description: adCopy.description,
+            destinationUrl: adCopy.destinationUrl || brief.websiteUrl,
+            displayLink: adCopy.displayLink,
+            cta: adCopy.callToAction,
+            platform: preview.platform,
+            device: preview.device,
+            adType: preview.adType,
+            adFormat: preview.adFormat,
+            meta: {
+              company: brief.companyOverview,
+              companyInfo: brief.companyInfo,
+              objective: brief.campaignObjective,
+              customPrompt: brief.customPrompt,
+              formula: brief.salesFormula,
+              facebookLink: brief.facebookLink,
+              url: brief.websiteUrl,
+              notes: brief.additionalInstructions,
+              facebookPageData: facebook.pageData
+            }
+          };
+          return spec;
+        },
+
+        getTrackedUrl: () => {
+          const state = get();
+          const baseInput = state.adCopy.destinationUrl || state.brief.websiteUrl;
+          if (!baseInput) return '';
+
+          let url: URL;
+          try {
+            url = new URL(baseInput);
+          } catch {
+            try {
+              url = new URL(`https://${baseInput}`);
+            } catch {
+              return '';
+            }
+          }
+
+          const defaults = defaultUTM();
+          const campaign = (state.brief.utm.campaign || defaults.campaign).trim();
+          const medium = (state.brief.utm.medium || defaults.medium).trim();
+          const source = (state.brief.utm.source || defaults.source).trim();
+          const contentRaw = state.brief.utm.content || state.adCopy.adName || '';
+          const content = slugify(contentRaw);
+
+          const params = url.searchParams;
+          params.set('utm_campaign', campaign || defaults.campaign);
+          params.set('utm_medium', medium || defaults.medium);
+          params.set('utm_source', source || defaults.source);
+          if (content) {
+            params.set('utm_content', content);
+          } else {
+            params.delete('utm_content');
+          }
+
+          url.search = params.toString();
+          return url.toString();
+        },
+
+        applyTrackedUrl: () => {
+          const tracked = get().getTrackedUrl();
+          if (!tracked) return;
+          set(state => ({
+            adCopy: {
+              ...state.adCopy,
+              destinationUrl: tracked
+            },
+            isDirty: true
+          }));
+        },
+
+        processCreativeUpload: async (file) => {
+          if (!file) {
+            set(state => ({
+              brief: { ...state.brief, creativeFile: null },
+              isDirty: true
+            }));
+            showToast('Creative removed', 'info');
+            return;
+          }
+
+          const base64 = await fileToBase64(file);
+          set(state => ({
+            brief: {
+              ...state.brief,
+              creativeFile: {
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                data: base64.data
+              }
+            },
+            isDirty: true
+          }));
+          showToast('Creative ready for AI analysis', 'success');
+        },
+
+        verifyFacebookPage: async (facebookUrl, websiteUrl) => {
+          if (!facebookUrl) {
+            set(state => ({
+              facebook: {
+                ...state.facebook,
+                error: 'Please provide a Facebook page URL',
+                verificationStatus: 'error'
+              }
+            }));
+            return;
+          }
+
+          set(state => ({
+            facebook: {
+              ...state.facebook,
+              verificationStatus: 'pending',
+              error: null
+            }
+          }));
+
+          try {
+            const response = await api.verifyFacebookPage({
+              facebookUrl,
+              websiteUrl: websiteUrl || get().brief.websiteUrl
+            });
+            const pageData = (response.data ?? null) as FacebookPageData | null;
+            set(state => ({
+              facebook: {
+                ...state.facebook,
+                pageData,
+                verificationStatus: 'success',
+                error: null
+              },
+              brief: {
+                ...state.brief,
+                companyOverview:
+                  state.brief.companyOverview || pageData?.intro || state.brief.companyOverview,
+                websiteUrl:
+                  state.brief.websiteUrl || (pageData?.website ? ensureHttps(pageData.website) : state.brief.websiteUrl)
+              },
+              isDirty: true
+            }));
+            showToast('Facebook page verified', 'success');
+          } catch (error) {
+            if (error instanceof ApiError && error.status === 0) {
+              const fallbackData = deriveFacebookFallback(facebookUrl);
+              if (fallbackData) {
+                set(state => ({
+                  facebook: {
+                    ...state.facebook,
+                    pageData: fallbackData,
+                    verificationStatus: 'success',
+                    error: null
+                  },
+                  brief: {
+                    ...state.brief,
+                    facebookLink: ensureHttps(facebookUrl)
+                  },
+                  isDirty: true
+                }));
+                const baseHint = CREATIVE_API_BASE ? ` (${CREATIVE_API_BASE})` : '';
+                showToast(`API offline${baseHint}. Using basic info from URL.`, 'warning');
+                return;
+              }
+            }
+
+            const message = error instanceof ApiError ? error.message : 'Unable to verify Facebook page';
+            set(state => ({
+              facebook: {
+                ...state.facebook,
+                verificationStatus: 'error',
+                error: message
+              }
+            }));
+            showToast(message, 'error');
+          }
+        },
+
+        generateAdCopy: async () => {
+          const state = get();
+          const { brief, facebook } = state;
+          const previouslyGenerated = state.ai.hasGenerated;
+
+          if (!brief.websiteUrl || !brief.companyOverview || !brief.campaignObjective) {
+            set(() => ({
+              ai: {
+                ...state.ai,
+                error: 'Please complete required fields before generating copy'
+              }
+            }));
+            return;
+          }
+
+          set(() => ({
+            ai: {
+              ...state.ai,
+              isGenerating: true,
+              error: null
+            }
+          }));
+
+          try {
+            const payload = {
+              website: ensureHttps(brief.websiteUrl),
+              companyOverview: brief.companyOverview,
+              objective: brief.campaignObjective,
+              salesFormula: brief.salesFormula || undefined,
+              companyInfo: brief.companyInfo || undefined,
+              instructions: brief.additionalInstructions || undefined,
+              customPrompt: brief.customPrompt || undefined,
+              includeEmoji: brief.includeEmoji,
+              facebookPageData: facebook.pageData || undefined,
+              creativeData: brief.creativeFile
+                ? {
+                    type: brief.creativeFile.type,
+                    data: brief.creativeFile.data || ''
+                  }
+                : null
+            };
+
+            const response = await api.generateAdCopy(payload);
+
+            set(state => ({
+              adCopy: {
+                ...state.adCopy,
+                primaryText: response.data.postText,
+                headline: response.data.headline,
+                description: response.data.linkDescription,
+                displayLink: response.data.displayLink,
+                callToAction: response.data.cta,
+                adName: response.data.adName,
+                destinationUrl: ensureHttps(brief.websiteUrl)
+              },
+              ai: {
+                isGenerating: false,
+                hasGenerated: true,
+                error: null,
+                lastGeneratedAt: Date.now()
+              },
+              isDirty: true
+            }));
+            showToast(previouslyGenerated ? 'Ad copy regenerated' : 'Ad copy generated', 'success');
+            get().applyTrackedUrl();
+          } catch (error) {
+            const message = error instanceof ApiError ? error.message : 'Unable to generate ad copy';
+            set(state => ({
+              ai: {
+                ...state.ai,
+                isGenerating: false,
+                error: message
+              }
+            }));
+            showToast(message, 'error');
+          }
+        },
+
+        regenerateAdCopy: async () => {
+          await get().generateAdCopy();
+        },
+
+        copySpecToClipboard: async () => {
+          const spec = get().exportSpec();
+          await navigator.clipboard.writeText(JSON.stringify(spec, null, 2));
+          showToast('Creative spec copied to clipboard', 'success');
+        },
+
+        downloadSpecJson: () => {
+          const spec = get().exportSpec();
+          const blob = new Blob([JSON.stringify(spec, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${spec.refName || 'creative-spec'}-${Date.now()}.json`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          showToast('Creative spec JSON downloaded', 'success');
+        },
+
+        downloadSpecSheet: () => {
+          const spec = get().exportSpec();
+          const trackedUrl = get().getTrackedUrl();
+          const sheet = generateSpecSheet(spec, trackedUrl);
+          const blob = new Blob([sheet], { type: 'text/plain;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${spec.refName || 'creative-spec'}-${Date.now()}-sheet.txt`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          showToast('Spec sheet downloaded', 'success');
+        },
+
+        downloadBundle: async () => {
+          const node = get().previewNode;
+          if (!node) {
+            showToast('Preview not ready to export', 'error');
+            return;
+          }
+
+          try {
+            const zip = new JSZip();
+            const spec = get().exportSpec();
+            const trackedUrl = get().getTrackedUrl();
+
+            zip.file('creative-spec.json', JSON.stringify(spec, null, 2));
+            zip.file('creative-spec-sheet.txt', generateSpecSheet(spec, trackedUrl));
+
+            const pngDataUrl = await toPng(node, { cacheBust: true });
+            const jpgDataUrl = await toJpeg(node, { cacheBust: true, quality: 0.92 });
+
+            zip.file('preview/preview.png', dataUrlToUint8Array(pngDataUrl));
+            zip.file('preview/preview.jpg', dataUrlToUint8Array(jpgDataUrl));
+
+            const creative = get().brief.creativeFile;
+            if (creative?.data) {
+              const bytes = base64ToUint8Array(creative.data);
+              zip.file(`creative/${creative.name}`, bytes);
+            }
+
+            const bundle = await zip.generateAsync({ type: 'blob' });
+            const url = URL.createObjectURL(bundle);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${spec.refName || 'creative-spec'}-${Date.now()}.zip`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Creative bundle downloaded', 'success');
+          } catch (error) {
+            console.error('Failed to export bundle', error);
+            showToast('Failed to export bundle', 'error');
+          }
+        },
+
+        loadAutosaveSnapshot: () => {
+          try {
+            const raw = localStorage.getItem(AUTOSAVE_STORAGE_KEY);
+            if (!raw) return;
+            const parsed = JSON.parse(raw) as {
+              savedAt: number;
+              state: {
+                brief: CreativeBrief;
+                adCopy: AdCopyFields;
+                preview: PreviewSettings;
+                facebook: FacebookState;
+              };
+            };
+            if (!parsed?.state) return;
+            set(state => ({
+              brief: { ...state.brief, ...parsed.state.brief },
+              adCopy: { ...state.adCopy, ...parsed.state.adCopy },
+              preview: { ...state.preview, ...parsed.state.preview },
+              facebook: { ...state.facebook, ...parsed.state.facebook },
+              autosave: { lastSavedAt: parsed.savedAt },
+              isDirty: false
+            }));
+          } catch (error) {
+            console.error('Failed to load autosave snapshot', error);
+          }
+        },
+
+        saveSnapshot: (timestamp = Date.now()) => {
+          const state = get();
+          const snapshot = {
+            savedAt: timestamp,
+            state: {
+              brief: state.brief,
+              adCopy: state.adCopy,
+              preview: state.preview,
+              facebook: state.facebook
+            }
+          } satisfies { savedAt: number; state: { brief: CreativeBrief; adCopy: AdCopyFields; preview: PreviewSettings; facebook: FacebookState } };
+
+          try {
+            localStorage.setItem(AUTOSAVE_STORAGE_KEY, JSON.stringify(snapshot));
+            set({
+              autosave: { lastSavedAt: timestamp },
+              isDirty: false
+            });
+          } catch (error) {
+            console.error('Failed to persist snapshot', error);
+          }
+        },
+
+        exportPreviewImage: async (format) => {
+          const node = get().previewNode;
+          if (!node) {
+            throw new Error('Preview element not available');
+          }
+
+          const exportFn = format === 'png' ? toPng : toJpeg;
+          const dataUrl = await exportFn(node, {
+            cacheBust: true,
+            quality: format === 'jpg' ? 0.92 : 1
+          });
+
+          const link = document.createElement('a');
+          link.href = dataUrl;
+          link.download = `creative-preview-${Date.now()}.${format}`;
+          link.click();
+          showToast(`Preview exported as ${format.toUpperCase()}`, 'success');
+        }
+      }),
+      {
+        name: 'meta-creative-builder-storage',
+        partialize: (state) => ({
+          brief: state.brief,
+          adCopy: state.adCopy,
+          preview: state.preview,
+          facebook: state.facebook,
+          ai: state.ai,
+          autosave: state.autosave,
+          isDirty: state.isDirty
+        })
+      }
+    )
+  )
+);

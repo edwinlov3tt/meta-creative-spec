@@ -1,0 +1,282 @@
+<!-- 
+Update index.html - Replace Font Awesome with CSS Sprites 
+
+BEFORE (current Font Awesome usage):
+<i class="btn-actions-icon fas fa-mobile-alt"></i>
+<i class="btn-actions-icon fas fa-cog"></i>
+
+AFTER (using CSS sprites):
+<i class="ap-icon ap-icon-mobile"></i>
+<i class="ap-icon ap-icon-cog"></i>
+-->
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Creative Preview Prototype v4 - Sprite Version</title>
+  <!-- Remove Font Awesome CSS link -->
+  <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"> -->
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+  
+  <!-- Preload sprite sheet for better performance -->
+  <link rel="preload" href="./assets/icons/ad-previewer-sprites.png" as="image">
+</head>
+<body class="locked">
+  <!-- Header with sprite icons -->
+  <header class="app-header container" id="app-header">
+    <h1 class="app-title">Creative Preview</h1>
+    <div class="header-actions">
+      <button class="btn btn-secondary" id="btn-save" title="Save fields locally">
+        <!-- BEFORE: <i class="fas fa-save"></i> -->
+        <i class="ap-icon ap-icon-save"></i>
+        Save
+      </button>
+      
+      <button class="btn btn-secondary" id="btn-regenerate" title="Regenerate with AI">
+        <!-- BEFORE: <i class="fas fa-sync"></i> -->
+        <i class="ap-icon ap-icon-sync"></i>
+        Generate
+      </button>
+      
+      <button class="btn" id="btn-copy" title="Copy all fields as JSON">
+        <!-- BEFORE: <i class="fas fa-clipboard"></i> -->
+        <i class="ap-icon ap-icon-clipboard"></i>
+        Copy
+      </button>
+      
+      <button class="btn" id="btn-download-spec" title="Download spec sheet">
+        <!-- BEFORE: <i class="fas fa-download"></i> -->
+        <i class="ap-icon ap-icon-download"></i>
+        Download Spec
+      </button>
+      
+      <div class="split" role="separator" aria-orientation="vertical"></div>
+      
+      <button class="btn btn-accent" id="btn-export-png" title="Export preview as PNG">
+        <!-- BEFORE: <i class="fas fa-download"></i> -->
+        <i class="ap-icon ap-icon-download"></i>
+        Export PNG
+      </button>
+      
+      <button class="btn btn-accent" id="btn-export-jpg" title="Export JPG">
+        <!-- BEFORE: <i class="fas fa-download"></i> -->
+        <i class="ap-icon ap-icon-download"></i>
+        Export JPG
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="container grid grid-lock">
+    <!-- Left column remains mostly the same, just icon updates -->
+    <div class="left-col scroll-col" id="left-col">
+      <!-- Step cards content unchanged, just icon updates where applicable -->
+    </div>
+
+    <!-- Right column preview controls with sprite icons -->
+    <section class="card right-col scroll-col" aria-labelledby="preview-title" id="preview-card">
+      <summary class="card-header summary-row sticky-top" id="preview-title">
+        <div>
+          <h2>Preview</h2>
+          <div class="muted">Choose placement, device, and format.</div>
+        </div>
+      </summary>
+
+      <!-- Toolbar with updated icons -->
+      <div class="card-header-preview toolbar-collapsible">
+        <details id="toolbar-details" open>
+          <summary class="summary toolbar-summary">
+            <!-- BEFORE: <i class="fas fa-cog"></i> -->
+            <i class="ap-icon ap-icon-cog"></i>
+            Preview Controls
+          </summary>
+          
+          <div class="toolbar">
+            <label class="chip">
+              <span>Platform</span>
+              <select id="platform">
+                <option value="facebook" selected>
+                  <!-- Could add platform icons here -->
+                  Facebook
+                </option>
+                <option value="instagram">Instagram</option>
+              </select>
+            </label>
+            
+            <label class="chip">
+              <!-- BEFORE: <i class="fas fa-desktop"></i> or <i class="fas fa-mobile"></i> -->
+              <i class="ap-icon ap-icon-desktop" id="device-icon"></i>
+              <span>Device</span>
+              <select id="device">
+                <option value="desktop" selected>Desktop</option>
+                <option value="mobile">Mobile</option>
+              </select>
+            </label>
+            
+            <label class="chip">
+              <!-- BEFORE: <i class="fas fa-newspaper"></i> etc. -->
+              <i class="ap-icon ap-icon-newspaper" id="adtype-icon"></i>
+              <span id="label-adtype">Ad Type</span>
+              <select id="adtype">
+                <option value="feed" selected>Feed</option>
+                <option value="story">Story</option>
+                <option value="reel">Reel</option>
+              </select>
+            </label>
+            
+            <label class="chip" id="chip-format">
+              <!-- BEFORE: <i class="fas fa-image"></i> -->
+              <i class="ap-icon ap-icon-image" id="format-icon"></i>
+              <span id="label-format">Ad Format</span>
+              <select id="format">
+                <option value="original" selected>Original</option>
+                <option value="square">1:1</option>
+              </select>
+            </label>
+          </div>
+        </details>
+      </div>
+
+      <!-- Preview area with updated social media icons -->
+      <div class="preview-viewport absolute-center" id="preview-viewport" aria-live="polite">
+        <div class="overflow-shadow top" id="shadow-top"></div>
+        <div class="overflow-shadow bottom" id="shadow-bottom"></div>
+
+        <div id="preview-root" class="preview platform-facebook adtype-feed">
+          <!-- Facebook Feed preview with sprite icons -->
+          <div class="fb-actions" id="fb-actions">
+            <button class="fb-action">
+              <!-- BEFORE: <span class="icon like"></span> -->
+              <i class="ap-icon ap-icon-like"></i>
+              <span class="fb-label">Like</span>
+            </button>
+            <button class="fb-action">
+              <!-- BEFORE: <span class="icon comment"></span> -->
+              <i class="ap-icon ap-icon-comment"></i>
+              <span class="fb-label">Comment</span>
+            </button>
+            <button class="fb-action">
+              <!-- BEFORE: <span class="icon share"></span> -->
+              <i class="ap-icon ap-icon-share"></i>
+              <span class="fb-label">Share</span>
+            </button>
+          </div>
+
+          <!-- Instagram below-image area with sprite icons -->
+          <div class="ig-below" id="ig-below">
+            <div class="ig-actions">
+              <button class="ig-action love" aria-label="Love">
+                <!-- BEFORE: SVG icon -->
+                <i class="ap-icon ap-icon-heart"></i>
+              </button>
+              <button class="ig-action comment" aria-label="Comment">
+                <!-- BEFORE: SVG icon -->
+                <i class="ap-icon ap-icon-comment"></i>
+              </button>
+              <button class="ig-action send" aria-label="Send">
+                <!-- BEFORE: SVG icon -->
+                <i class="ap-icon ap-icon-send"></i>
+              </button>
+              <button class="ig-action bookmark" aria-label="Save">
+                <!-- BEFORE: SVG icon -->
+                <i class="ap-icon ap-icon-bookmark"></i>
+              </button>
+            </div>
+            <!-- Rest of Instagram content -->
+          </div>
+
+          <!-- Story/Reel overlay with sprite icons -->
+          <div class="overlay" id="sr-overlay">
+            <div class="overlay-top-row">
+              <div class="avatar small"></div>
+              <div class="company">Your Brand</div>
+              <div class="sponsored">Sponsored</div>
+              <button class="overlay-ellipsis" aria-label="More">
+                <!-- BEFORE: ⋯ text -->
+                <i class="ap-icon ap-icon-ellipsis-v"></i>
+              </button>
+              <button class="overlay-close" aria-label="Close">×</button>
+            </div>
+            
+            <aside class="overlay-actions">
+              <button class="ig-action love" aria-label="Love">
+                <i class="ap-icon ap-icon-heart"></i>
+              </button>
+              <button class="ig-action comment" aria-label="Comment">
+                <i class="ap-icon ap-icon-comment"></i>
+              </button>
+              <button class="ig-action send" aria-label="Send">
+                <i class="ap-icon ap-icon-send"></i>
+              </button>
+              <button class="ig-action ellipsis" aria-label="More">
+                <i class="ap-icon ap-icon-ellipsis-v"></i>
+              </button>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Scripts - remove Font Awesome dependencies -->
+  <!-- Remove: <script src="https://kit.fontawesome.com/..."></script> -->
+  
+  <script src="https://unpkg.com/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
+  <script src="https://unpkg.com/dom-to-image-more@3.3.7/dist/dom-to-image-more.min.js"></script>
+  
+  <!-- Add sprite management script -->
+  <script src="./sprites.js"></script>
+  <script src="./app.js"></script>
+  
+  <script>
+    // Update icons based on selections
+    document.getElementById('device').addEventListener('change', function(e) {
+      const deviceIcon = document.getElementById('device-icon');
+      deviceIcon.className = e.target.value === 'desktop' ? 'ap-icon ap-icon-desktop' : 'ap-icon ap-icon-mobile';
+    });
+    
+    document.getElementById('adtype').addEventListener('change', function(e) {
+      const adtypeIcon = document.getElementById('adtype-icon');
+      const iconMap = {
+        'feed': 'ap-icon-newspaper',
+        'story': 'ap-icon-book-open',
+        'reel': 'ap-icon-film'
+      };
+      adtypeIcon.className = 'ap-icon ' + iconMap[e.target.value];
+    });
+    
+    document.getElementById('format').addEventListener('change', function(e) {
+      const formatIcon = document.getElementById('format-icon');
+      formatIcon.className = e.target.value === 'square' ? 'ap-icon ap-icon-images' : 'ap-icon ap-icon-image';
+    });
+  </script>
+</body>
+</html>
+
+<!-- 
+MIGRATION CHECKLIST:
+
+1. ✅ Remove Font Awesome CSS link
+2. ✅ Add sprite preload link
+3. ✅ Replace all fa- classes with ap-icon classes
+4. ✅ Update toolbar icons to be dynamic
+5. ✅ Replace social media action icons
+6. ✅ Add sprite management script
+7. ⏳ Create sprite sheet image file
+8. ⏳ Generate sprite CSS positions
+9. ⏳ Test icon loading and positioning
+10. ⏳ Add fallbacks for missing icons
+
+BENEFITS ACHIEVED:
+- Single HTTP request for all icons (vs ~20+ with Font Awesome)
+- Smaller bundle size for limited icon set
+- Better caching efficiency
+- Full control over icon appearance
+- Consistent visual design
+- Better loading performance
+-->

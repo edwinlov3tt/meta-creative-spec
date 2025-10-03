@@ -42,6 +42,10 @@ export const useCreativePreviewData = () => {
     return '';
   }, [facebook.pageData]);
 
+  const creativeImage = useMemo(() => {
+    return brief.creativeFile?.data || '';
+  }, [brief.creativeFile]);
+
   const adData = useMemo(() => ({
     adName: adCopy.adName,
     primaryText: truncatedPrimary,
@@ -51,8 +55,9 @@ export const useCreativePreviewData = () => {
     websiteUrl: adCopy.destinationUrl,
     displayLink: adCopy.displayLink || 'example.com',
     brandName,
-    profileImage
-  }), [adCopy.adName, truncatedPrimary, adCopy.headline, adCopy.description, adCopy.callToAction, adCopy.destinationUrl, adCopy.displayLink, brandName, profileImage]);
+    profileImage,
+    creativeImage
+  }), [adCopy.adName, truncatedPrimary, adCopy.headline, adCopy.description, adCopy.callToAction, adCopy.destinationUrl, adCopy.displayLink, brandName, profileImage, creativeImage]);
 
   return {
     platform,
@@ -62,6 +67,7 @@ export const useCreativePreviewData = () => {
     adData,
     truncatedPrimary,
     brandName,
-    profileImage
+    profileImage,
+    creativeImage
   };
 };

@@ -16,6 +16,7 @@ interface InstagramPreviewProps {
     displayLink: string;
     brandName: string;
     profileImage: string;
+    creativeImage: string;
   };
 }
 
@@ -28,6 +29,13 @@ export const InstagramPreview: React.FC<InstagramPreviewProps> = ({
   if (adType === 'story' || adType === 'reel') {
     return (
       <div className="bg-black rounded-lg aspect-story relative overflow-hidden">
+        {adData.creativeImage && (
+          <img
+            src={adData.creativeImage}
+            alt="Ad creative"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60">
           <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
             <p className="text-sm mb-4">{adData.primaryText}</p>
@@ -41,12 +49,14 @@ export const InstagramPreview: React.FC<InstagramPreviewProps> = ({
             </a>
           </div>
         </div>
-        <div className="absolute inset-0 flex items-center justify-center text-white/60">
-          <div className="text-center">
-            <div className="w-24 h-24 bg-white/20 rounded-lg mx-auto mb-2" />
-            <p className="text-sm">Story/Reel Preview</p>
+        {!adData.creativeImage && (
+          <div className="absolute inset-0 flex items-center justify-center text-white/60">
+            <div className="text-center">
+              <div className="w-24 h-24 bg-white/20 rounded-lg mx-auto mb-2" />
+              <p className="text-sm">Story/Reel Preview</p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     );
   }
@@ -75,17 +85,27 @@ export const InstagramPreview: React.FC<InstagramPreviewProps> = ({
       </div>
 
       <div
-        className={`bg-surface-200 flex items-center justify-center text-text-muted ${
+        className={`bg-surface-200 flex items-center justify-center text-text-muted relative overflow-hidden ${
           adFormat === '1:1' ? 'aspect-square' :
           adFormat === '4:5' ? 'aspect-4-5' :
           'aspect-square'
         }`}
       >
-        <div className="text-center">
-          <div className="w-16 h-16 bg-surface-300 rounded-lg mx-auto mb-2" />
-          <p className="text-sm">Ad Creative</p>
-          <p className="text-xs uppercase tracking-wide text-text-muted">{adFormat} format</p>
-        </div>
+        {adData.creativeImage ? (
+          <img
+            src={adData.creativeImage}
+            alt="Ad creative"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="text-center">
+            <div className="w-16 h-16 bg-surface-300 rounded-lg mx-auto mb-2" />
+            <p className="text-sm">Ad Creative</p>
+            <p className="text-xs uppercase tracking-wide text-text-muted">
+              {adFormat === '1:1' ? '1080×1080' : adFormat} format
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="border-b border-divider">

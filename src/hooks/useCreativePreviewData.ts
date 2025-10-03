@@ -44,18 +44,15 @@ export const useCreativePreviewData = () => {
   }, [facebook.pageData]);
 
   const creativeImage = useMemo(() => {
-    const fileData = brief.creativeFile?.data;
-    if (!fileData || typeof fileData !== 'string') return '';
+    const creativeFile = brief.creativeFile;
+    if (!creativeFile?.data || !creativeFile?.type) return '';
+
+    const fileData = creativeFile.data;
+    const fileType = creativeFile.type;
 
     // If it's already a blob URL or regular URL, return as-is
     if (fileData.startsWith('blob:') || fileData.startsWith('http')) {
       return fileData;
-    }
-
-    // Validate base64 data URL format
-    if (!fileData.includes(',') || !fileData.startsWith('data:')) {
-      console.warn('Invalid file data format, expected base64 data URL');
-      return '';
     }
 
     // Convert base64 to Blob URL to avoid 431 error
@@ -65,21 +62,9 @@ export const useCreativePreviewData = () => {
         URL.revokeObjectURL(blobUrlRef.current);
       }
 
-      const parts = fileData.split(',');
-      if (parts.length !== 2) {
-        console.warn('Invalid base64 data URL structure');
-        return '';
-      }
-
-      const base64Data = parts[1];
-      const mimeType = parts[0].split(':')[1]?.split(';')[0];
-
-      if (!mimeType || !base64Data) {
-        console.warn('Missing MIME type or base64 data');
-        return '';
-      }
-
-      const byteCharacters = atob(base64Data);
+      // The data is stored as raw base64 string without the data URL prefix
+      // Convert it back to bytes
+      const byteCharacters = atob(fileData);
       const byteNumbers = new Array(byteCharacters.length);
 
       for (let i = 0; i < byteCharacters.length; i++) {
@@ -87,7 +72,7 @@ export const useCreativePreviewData = () => {
       }
 
       const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: mimeType });
+      const blob = new Blob([byteArray], { type: fileType });
       const blobUrl = URL.createObjectURL(blob);
       blobUrlRef.current = blobUrl;
 

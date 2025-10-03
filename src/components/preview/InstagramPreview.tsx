@@ -88,12 +88,12 @@ export const InstagramPreview: React.FC<InstagramPreviewProps> = ({
         </div>
       </div>
 
-      <div className="px-3 py-2 border-b border-divider">
+      <div className="border-b border-divider">
         <a
           href={adData.websiteUrl || '#'}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-between w-full px-4 py-2.5 bg-white border border-surface-300 rounded-md text-sm font-medium text-text-primary hover:bg-surface-50"
+          className="flex items-center justify-between w-full px-4 py-3 text-sm font-medium text-text-primary hover:bg-surface-100 transition-colors"
         >
           <span>{adData.callToAction}</span>
           <ChevronRight className="w-4 h-4" />

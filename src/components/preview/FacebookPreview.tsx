@@ -31,9 +31,14 @@ export const FacebookPreview: React.FC<FacebookPreviewProps> = ({
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60">
           <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
             <p className="text-sm mb-4">{adData.primaryText}</p>
-            <button className="bg-white text-black px-6 py-2 rounded-full font-medium">
+            <a
+              href={adData.websiteUrl || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-white text-black px-6 py-2 rounded-full font-medium inline-block"
+            >
               {adData.callToAction}
-            </button>
+            </a>
           </div>
         </div>
         <div className="absolute inset-0 flex items-center justify-center text-white/60">
@@ -96,9 +101,16 @@ export const FacebookPreview: React.FC<FacebookPreviewProps> = ({
           <p className="text-xs text-text-muted uppercase mb-1">{adData.displayLink}</p>
           <h4 className="font-medium text-sm text-text-primary mb-1">{adData.headline}</h4>
           <p className="text-xs text-text-secondary mb-2">{adData.description}</p>
-          <button className="bg-surface-200 text-text-primary text-xs px-3 py-1.5 rounded font-medium hover:bg-surface-300">
-            {adData.callToAction}
-          </button>
+          <div className="flex justify-end">
+            <a
+              href={adData.websiteUrl || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-surface-200 text-text-primary text-xs px-3 py-1.5 rounded font-medium hover:bg-surface-300 inline-block"
+            >
+              {adData.callToAction}
+            </a>
+          </div>
         </div>
       </div>
 

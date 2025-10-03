@@ -31,9 +31,14 @@ export const InstagramPreview: React.FC<InstagramPreviewProps> = ({
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60">
           <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
             <p className="text-sm mb-4">{adData.primaryText}</p>
-            <button className="bg-white text-black px-6 py-2 rounded-full font-medium">
+            <a
+              href={adData.websiteUrl || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-white text-black px-6 py-2 rounded-full font-medium inline-block"
+            >
               {adData.callToAction}
-            </button>
+            </a>
           </div>
         </div>
         <div className="absolute inset-0 flex items-center justify-center text-white/60">
@@ -101,9 +106,14 @@ export const InstagramPreview: React.FC<InstagramPreviewProps> = ({
         </div>
 
         <div className="mt-3">
-          <button className="bg-instagram text-white px-4 py-2 rounded-md text-sm font-medium w-full">
+          <a
+            href={adData.websiteUrl || '#'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-instagram text-white px-4 py-2 rounded-md text-sm font-medium w-full block text-center"
+          >
             {adData.callToAction}
-          </button>
+          </a>
         </div>
 
         <p className="text-sm text-text-muted mt-2">View all 12 comments</p>

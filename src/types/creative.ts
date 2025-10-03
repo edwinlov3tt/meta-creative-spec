@@ -86,16 +86,21 @@ export interface AIState {
 
 export interface AutosaveState {
   lastSavedAt: number | null;
+  isSaving: boolean;
+  error: string | null;
 }
 
 export interface SpecExport {
   refName: string;
+  adName?: string;
   postText: string;
   headline: string;
   description: string;
   destinationUrl: string;
   displayLink: string;
   cta: string;
+  imageName?: string;
+  facebookPageUrl?: string;
   platform: Platform;
   device: Device;
   adType: AdType;
@@ -140,6 +145,7 @@ export interface CreativeStore {
   markDirty: () => void;
   markSaved: (timestamp?: number) => void;
   resetStore: () => void;
+  setAutosaveState: (updates: Partial<AutosaveState>) => void;
 
   exportSpec: () => SpecExport;
 

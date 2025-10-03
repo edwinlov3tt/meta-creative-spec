@@ -6,6 +6,7 @@ import { toPng, toJpeg } from 'html-to-image';
 import JSZip from 'jszip';
 import { slugify } from '@/utils/slugify';
 import { showToast } from '@/stores/toastStore';
+import { ExcelExportService } from '@/services/excelExportService';
 import type {
   CreativeStore,
   CreativeBrief,
@@ -15,7 +16,8 @@ import type {
   FacebookState,
   AIState,
   FacebookPageData,
-  SpecExport
+  SpecExport,
+  AutosaveState
 } from '@/types/creative';
 
 const ensureHttps = (url: string) => {
@@ -191,6 +193,12 @@ const defaultAIState = (): AIState => ({
   lastGeneratedAt: null
 });
 
+const defaultAutosaveState = (): AutosaveState => ({
+  lastSavedAt: null,
+  isSaving: false,
+  error: null
+});
+
 const AUTOSAVE_STORAGE_KEY = 'meta-creative-autosave-snapshot';
 
 export const useCreativeStore = create<CreativeStore>()(
@@ -202,7 +210,7 @@ export const useCreativeStore = create<CreativeStore>()(
         preview: defaultPreview(),
         facebook: defaultFacebookState(),
         ai: defaultAIState(),
-        autosave: { lastSavedAt: null },
+        autosave: defaultAutosaveState(),
         isDirty: false,
         previewNode: null,
 
@@ -281,6 +289,11 @@ export const useCreativeStore = create<CreativeStore>()(
             ai: { ...state.ai, ...aiUpdates }
           })),
 
+        setAutosaveState: (updates) =>
+          set(state => ({
+            autosave: { ...state.autosave, ...updates }
+          })),
+
         setPreviewNode: (node) =>
           set({ previewNode: node ?? null }),
 
@@ -289,7 +302,7 @@ export const useCreativeStore = create<CreativeStore>()(
         markSaved: (timestamp = Date.now()) =>
           set({
             isDirty: false,
-            autosave: { lastSavedAt: timestamp }
+            autosave: { lastSavedAt: timestamp, isSaving: false, error: null }
           }),
 
         resetStore: () =>
@@ -299,7 +312,7 @@ export const useCreativeStore = create<CreativeStore>()(
             preview: defaultPreview(),
             facebook: defaultFacebookState(),
             ai: defaultAIState(),
-            autosave: { lastSavedAt: null },
+            autosave: defaultAutosaveState(),
             isDirty: false
           }),
 
@@ -309,12 +322,15 @@ export const useCreativeStore = create<CreativeStore>()(
 
           const spec: SpecExport = {
             refName: adCopy.adName,
+            adName: adCopy.adName,
             postText: adCopy.primaryText,
             headline: adCopy.headline,
             description: adCopy.description,
             destinationUrl: adCopy.destinationUrl || brief.websiteUrl,
             displayLink: adCopy.displayLink,
             cta: adCopy.callToAction,
+            imageName: brief.creativeFile?.name || 'creative-image',
+            facebookPageUrl: brief.facebookLink,
             platform: preview.platform,
             device: preview.device,
             adType: preview.adType,
@@ -624,20 +640,29 @@ export const useCreativeStore = create<CreativeStore>()(
           showToast('Creative spec JSON downloaded', 'success');
         },
 
-        downloadSpecSheet: () => {
-          const spec = get().exportSpec();
-          const trackedUrl = get().getTrackedUrl();
-          const sheet = generateSpecSheet(spec, trackedUrl);
-          const blob = new Blob([sheet], { type: 'text/plain;charset=utf-8' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `${spec.refName || 'creative-spec'}-${Date.now()}-sheet.txt`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-          showToast('Spec sheet downloaded', 'success');
+        downloadSpecSheet: async () => {
+          try {
+            const spec = get().exportSpec();
+            const excelService = new ExcelExportService();
+            const excelBuffer = await excelService.generateExcel(spec, spec.facebookPageUrl);
+            const filename = excelService.generateFilename(spec.refName || 'creative-spec', true);
+
+            const blob = new Blob([excelBuffer], {
+              type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Excel spec sheet downloaded', 'success');
+          } catch (error) {
+            console.error('Failed to download spec sheet', error);
+            showToast('Failed to download spec sheet', 'error');
+          }
         },
 
         downloadBundle: async () => {
@@ -650,10 +675,15 @@ export const useCreativeStore = create<CreativeStore>()(
           try {
             const zip = new JSZip();
             const spec = get().exportSpec();
-            const trackedUrl = get().getTrackedUrl();
 
+            // Generate Excel spec sheet
+            const excelService = new ExcelExportService();
+            const excelBuffer = await excelService.generateExcel(spec, spec.facebookPageUrl);
+            const excelFilename = excelService.generateFilename(spec.refName || 'creative-spec', false);
+
+            // Add files to ZIP
             zip.file('creative-spec.json', JSON.stringify(spec, null, 2));
-            zip.file('creative-spec-sheet.txt', generateSpecSheet(spec, trackedUrl));
+            zip.file(excelFilename, excelBuffer);
 
             const pngDataUrl = await toPng(node, { cacheBust: true });
             const jpgDataUrl = await toJpeg(node, { cacheBust: true, quality: 0.92 });
@@ -702,7 +732,7 @@ export const useCreativeStore = create<CreativeStore>()(
               adCopy: { ...state.adCopy, ...parsed.state.adCopy },
               preview: { ...state.preview, ...parsed.state.preview },
               facebook: { ...state.facebook, ...parsed.state.facebook },
-              autosave: { lastSavedAt: parsed.savedAt },
+              autosave: { lastSavedAt: parsed.savedAt, isSaving: false, error: null },
               isDirty: false
             }));
           } catch (error) {
@@ -724,12 +754,15 @@ export const useCreativeStore = create<CreativeStore>()(
 
           try {
             localStorage.setItem(AUTOSAVE_STORAGE_KEY, JSON.stringify(snapshot));
-            set({
-              autosave: { lastSavedAt: timestamp },
+            set(state => ({
+              autosave: { ...state.autosave, lastSavedAt: timestamp, isSaving: false, error: null },
               isDirty: false
-            });
+            }));
           } catch (error) {
             console.error('Failed to persist snapshot', error);
+            set(state => ({
+              autosave: { ...state.autosave, isSaving: false, error: 'Failed to auto-save' }
+            }));
           }
         },
 
@@ -762,7 +795,18 @@ export const useCreativeStore = create<CreativeStore>()(
           ai: state.ai,
           autosave: state.autosave,
           isDirty: state.isDirty
-        })
+        }),
+        merge: (persistedState, currentState) => {
+          const typedPersisted = persistedState as Partial<CreativeStore> | undefined;
+          return {
+            ...currentState,
+            ...typedPersisted,
+            autosave: {
+              ...defaultAutosaveState(),
+              ...(typedPersisted?.autosave ?? {})
+            }
+          };
+        }
       }
     )
   )

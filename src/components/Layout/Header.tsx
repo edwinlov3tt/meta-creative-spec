@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Download, RotateCcw, Save, FileImage, ChevronDown } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Download, RotateCcw, Save, FileImage, ChevronDown, AlertCircle, Check } from 'lucide-react';
 import { Button } from '@/components/UI/Button';
 import { useCreativeStore } from '@/stores/creativeStore';
 import { showToast } from '@/stores/toastStore';
@@ -15,8 +15,26 @@ export const Header: React.FC = () => {
   const downloadBundle = useCreativeStore(state => state.downloadBundle);
   const exportPreviewImage = useCreativeStore(state => state.exportPreviewImage);
   const aiState = useCreativeStore(state => state.ai);
+  const autosave = useCreativeStore(state => state.autosave);
+  const isSaving = autosave.isSaving ?? false;
+  const saveError = autosave.error ?? null;
+  const lastSavedAt = autosave.lastSavedAt ?? null;
 
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
+
+  const autosaveStatus = useMemo(() => {
+    if (isSaving) {
+      return { icon: <Save className="w-4 h-4 text-primary animate-pulse" />, label: 'Saving…', tone: 'text-primary' as const };
+    }
+    if (saveError) {
+      return { icon: <AlertCircle className="w-4 h-4 text-danger" />, label: 'Autosave failed', tone: 'text-danger' as const };
+    }
+    if (lastSavedAt) {
+      const formatted = new Date(lastSavedAt).toLocaleTimeString();
+      return { icon: <Check className="w-4 h-4 text-success" />, label: `Auto-saved ${formatted}`, tone: 'text-text-muted' as const };
+    }
+    return null;
+  }, [isSaving, saveError, lastSavedAt]);
 
   const handleReset = () => {
     resetStore();
@@ -78,6 +96,13 @@ export const Header: React.FC = () => {
 
           <div className="h-8 w-px bg-surface-200" />
 
+          {autosaveStatus && (
+            <div className="hidden md:flex items-center gap-2 text-12">
+              {autosaveStatus.icon}
+              <span className={autosaveStatus.tone}>{autosaveStatus.label}</span>
+            </div>
+          )}
+
           <div className="flex items-center space-x-2">
             <div className="relative">
               <Button
@@ -112,9 +137,9 @@ export const Header: React.FC = () => {
                   <button
                     type="button"
                     className="w-full text-left px-4 py-2 hover:bg-surface-100"
-                    onClick={() => { setExportMenuOpen(false); downloadSpecSheet(); }}
+                    onClick={() => { setExportMenuOpen(false); void downloadSpecSheet(); }}
                   >
-                    Spec Sheet (.txt)
+                    Spec Sheet (.xlsx)
                   </button>
                   <button
                     type="button"

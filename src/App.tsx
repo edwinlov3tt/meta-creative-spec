@@ -15,7 +15,7 @@ function App() {
   }, [loadAutosaveSnapshot]);
 
   return (
-    <div className="min-h-screen bg-canvas flex flex-col">
+    <div className="h-screen bg-canvas flex flex-col overflow-hidden">
       <Header />
 
       <main className="flex-1 min-h-0 overflow-hidden">
@@ -25,16 +25,10 @@ function App() {
           minLeftWidth={35}
           maxLeftWidth={70}
           leftPanel={
-            <div className="max-w-3xl mx-auto p-6 space-y-sp-6">
-              <FormBuilder />
-            </div>
+            <FormBuilder />
           }
           rightPanel={
-            <div className="h-full bg-surface-50 flex items-center justify-center">
-              <div className="w-full max-w-md px-4 py-6">
-                <AdPreview />
-              </div>
-            </div>
+            <AdPreview />
           }
         />
       </main>

@@ -97,20 +97,20 @@ export const FacebookPreview: React.FC<FacebookPreviewProps> = ({
       </div>
 
       <div className="border-t border-divider bg-surface-50">
-        <div className="p-3">
-          <p className="text-xs text-text-muted uppercase mb-1">{adData.displayLink}</p>
-          <h4 className="font-medium text-sm text-text-primary mb-1">{adData.headline}</h4>
-          <p className="text-xs text-text-secondary mb-2">{adData.description}</p>
-          <div className="flex justify-end">
-            <a
-              href={adData.websiteUrl || '#'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-surface-200 text-text-primary text-xs px-3 py-1.5 rounded font-medium hover:bg-surface-300 inline-block"
-            >
-              {adData.callToAction}
-            </a>
+        <div className="p-3 flex items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-text-muted uppercase mb-1">{adData.displayLink}</p>
+            <h4 className="font-medium text-sm text-text-primary mb-1">{adData.headline}</h4>
+            <p className="text-xs text-text-secondary">{adData.description}</p>
           </div>
+          <a
+            href={adData.websiteUrl || '#'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-surface-200 text-text-primary text-xs px-3 py-1.5 rounded font-medium hover:bg-surface-300 flex-shrink-0"
+          >
+            {adData.callToAction}
+          </a>
         </div>
       </div>
 

@@ -698,8 +698,33 @@ export const useCreativeStore = create<CreativeStore>()(
 
             // 4. Add preview screenshots (PNG and JPG)
             try {
-              const pngDataUrl = await toPng(node, { cacheBust: true, pixelRatio: 2 });
-              const jpgDataUrl = await toJpeg(node, { cacheBust: true, quality: 0.95, pixelRatio: 2 });
+              const creative = get().brief.creativeFile;
+
+              // Convert blob URLs back to data URLs for export
+              const filter = (node: HTMLElement) => {
+                if (node.tagName === 'IMG') {
+                  const img = node as HTMLImageElement;
+                  if (img.src.startsWith('blob:') && creative?.data && creative?.type) {
+                    // Replace blob URL with data URL for export
+                    img.src = `data:${creative.type};base64,${creative.data}`;
+                  }
+                }
+                return true;
+              };
+
+              const pngDataUrl = await toPng(node, {
+                cacheBust: true,
+                pixelRatio: 2,
+                skipFonts: true,
+                filter
+              });
+              const jpgDataUrl = await toJpeg(node, {
+                cacheBust: true,
+                quality: 0.95,
+                pixelRatio: 2,
+                skipFonts: true,
+                filter
+              });
 
               zip.file('previews/preview.png', dataUrlToUint8Array(pngDataUrl));
               zip.file('previews/preview.jpg', dataUrlToUint8Array(jpgDataUrl));
@@ -709,14 +734,14 @@ export const useCreativeStore = create<CreativeStore>()(
             }
 
             // 5. Add original creative file
-            const creative = get().brief.creativeFile;
-            if (creative?.data && creative?.name) {
+            const creativeFile = get().brief.creativeFile;
+            if (creativeFile?.data && creativeFile?.name) {
               try {
-                const bytes = base64ToUint8Array(creative.data);
-                const ext = creative.name.split('.').pop()?.toLowerCase();
+                const bytes = base64ToUint8Array(creativeFile.data);
+                const ext = creativeFile.name.split('.').pop()?.toLowerCase();
 
                 // Add original
-                zip.file(`creatives/original/${creative.name}`, bytes);
+                zip.file(`creatives/original/${creativeFile.name}`, bytes);
 
                 // Add copies in standard formats for easy use
                 if (ext === 'png' || ext === 'jpg' || ext === 'jpeg' || ext === 'webp') {
@@ -728,34 +753,6 @@ export const useCreativeStore = create<CreativeStore>()(
                 showToast('Warning: Creative file skipped', 'warning');
               }
             }
-
-            // 6. Add README
-            const readme = `Meta Creative Bundle
-====================
-
-This bundle contains all assets for: ${spec.refName || 'Untitled Creative'}
-Generated: ${new Date(timestamp).toLocaleString()}
-
-Contents:
----------
-• creative-spec.json - Machine-readable spec data
-• creative-spec.xlsx - Excel spec sheet with Meta template
-• creative-spec.txt - Human-readable spec sheet
-• previews/ - Ad preview screenshots (PNG and JPG)
-• creatives/ - Original creative files and formatted copies
-
-Usage:
-------
-1. Share the Excel file with your buying team
-2. Upload creatives from the creatives/ folder to Meta Ads Manager
-3. Use the spec data to configure your ad campaign
-4. Reference preview screenshots for approval workflows
-
-Platform: ${spec.platform || 'Facebook/Instagram'}
-Ad Type: Feed, Story, Reel compatible
-Dimensions: Multiple formats included
-`;
-            zip.file('README.txt', readme);
 
             // Generate and download the bundle
             const bundle = await zip.generateAsync({
@@ -840,10 +837,26 @@ Dimensions: Multiple formats included
             throw new Error('Preview element not available');
           }
 
+          const creative = get().brief.creativeFile;
+
+          // Convert blob URLs back to data URLs for export
+          const filter = (node: HTMLElement) => {
+            if (node.tagName === 'IMG') {
+              const img = node as HTMLImageElement;
+              if (img.src.startsWith('blob:') && creative?.data && creative?.type) {
+                // Replace blob URL with data URL for export
+                img.src = `data:${creative.type};base64,${creative.data}`;
+              }
+            }
+            return true;
+          };
+
           const exportFn = format === 'png' ? toPng : toJpeg;
           const dataUrl = await exportFn(node, {
             cacheBust: true,
-            quality: format === 'jpg' ? 0.92 : 1
+            quality: format === 'jpg' ? 0.92 : 1,
+            skipFonts: true,
+            filter
           });
 
           const link = document.createElement('a');

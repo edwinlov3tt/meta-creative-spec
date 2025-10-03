@@ -84,8 +84,9 @@ export class ExcelExportService {
 
   /**
    * Generate populated Excel file
+   * Returns ArrayBuffer (compatible with Blob constructor in browser)
    */
-  async generateExcel(spec: SpecExport, facebookUrl?: string): Promise<Buffer> {
+  async generateExcel(spec: SpecExport, facebookUrl?: string): Promise<ArrayBuffer> {
     try {
       console.log('Starting Excel generation...');
 
@@ -120,7 +121,8 @@ export class ExcelExportService {
       const buffer = await workbook.xlsx.writeBuffer();
       console.log('Excel buffer generated, size:', buffer.byteLength);
 
-      return Buffer.from(buffer);
+      // Return ArrayBuffer directly (Buffer doesn't exist in browser)
+      return buffer;
 
     } catch (error) {
       console.error('Excel generation error:', error);

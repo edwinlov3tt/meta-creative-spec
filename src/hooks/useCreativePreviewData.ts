@@ -45,11 +45,17 @@ export const useCreativePreviewData = () => {
 
   const creativeImage = useMemo(() => {
     const fileData = brief.creativeFile?.data;
-    if (!fileData) return '';
+    if (!fileData || typeof fileData !== 'string') return '';
 
     // If it's already a blob URL or regular URL, return as-is
     if (fileData.startsWith('blob:') || fileData.startsWith('http')) {
       return fileData;
+    }
+
+    // Validate base64 data URL format
+    if (!fileData.includes(',') || !fileData.startsWith('data:')) {
+      console.warn('Invalid file data format, expected base64 data URL');
+      return '';
     }
 
     // Convert base64 to Blob URL to avoid 431 error
@@ -59,8 +65,20 @@ export const useCreativePreviewData = () => {
         URL.revokeObjectURL(blobUrlRef.current);
       }
 
-      const base64Data = fileData.split(',')[1];
-      const mimeType = fileData.split(',')[0].split(':')[1].split(';')[0];
+      const parts = fileData.split(',');
+      if (parts.length !== 2) {
+        console.warn('Invalid base64 data URL structure');
+        return '';
+      }
+
+      const base64Data = parts[1];
+      const mimeType = parts[0].split(':')[1]?.split(';')[0];
+
+      if (!mimeType || !base64Data) {
+        console.warn('Missing MIME type or base64 data');
+        return '';
+      }
+
       const byteCharacters = atob(base64Data);
       const byteNumbers = new Array(byteCharacters.length);
 

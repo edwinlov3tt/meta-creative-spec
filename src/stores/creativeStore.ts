@@ -176,7 +176,8 @@ const defaultPreview = (): PreviewSettings => ({
   platform: 'facebook',
   device: 'desktop',
   adType: 'feed',
-  adFormat: 'original'
+  adFormat: 'original',
+  forceExpandText: false
 });
 
 const defaultFacebookState = (): FacebookState => ({
@@ -698,6 +699,14 @@ export const useCreativeStore = create<CreativeStore>()(
 
             // 4. Add preview screenshots (PNG and JPG)
             try {
+              // Temporarily expand text for export
+              set(state => ({
+                preview: { ...state.preview, forceExpandText: true }
+              }));
+
+              // Wait for React to re-render
+              await new Promise(resolve => setTimeout(resolve, 100));
+
               const creative = get().brief.creativeFile;
 
               // Convert blob URLs back to data URLs for export
@@ -728,9 +737,18 @@ export const useCreativeStore = create<CreativeStore>()(
 
               zip.file('previews/preview.png', dataUrlToUint8Array(pngDataUrl));
               zip.file('previews/preview.jpg', dataUrlToUint8Array(jpgDataUrl));
+
+              // Restore normal state
+              set(state => ({
+                preview: { ...state.preview, forceExpandText: false }
+              }));
             } catch (error) {
               console.error('Failed to generate preview screenshots', error);
               showToast('Warning: Preview screenshots skipped', 'warning');
+              // Restore normal state even on error
+              set(state => ({
+                preview: { ...state.preview, forceExpandText: false }
+              }));
             }
 
             // 5. Add original creative file
@@ -837,33 +855,48 @@ export const useCreativeStore = create<CreativeStore>()(
             throw new Error('Preview element not available');
           }
 
-          const creative = get().brief.creativeFile;
+          // Temporarily expand text for export
+          set(state => ({
+            preview: { ...state.preview, forceExpandText: true }
+          }));
 
-          // Convert blob URLs back to data URLs for export
-          const filter = (node: HTMLElement) => {
-            if (node.tagName === 'IMG') {
-              const img = node as HTMLImageElement;
-              if (img.src.startsWith('blob:') && creative?.data && creative?.type) {
-                // Replace blob URL with data URL for export
-                img.src = `data:${creative.type};base64,${creative.data}`;
+          // Wait for React to re-render
+          await new Promise(resolve => setTimeout(resolve, 100));
+
+          try {
+            const creative = get().brief.creativeFile;
+
+            // Convert blob URLs back to data URLs for export
+            const filter = (node: HTMLElement) => {
+              if (node.tagName === 'IMG') {
+                const img = node as HTMLImageElement;
+                if (img.src.startsWith('blob:') && creative?.data && creative?.type) {
+                  // Replace blob URL with data URL for export
+                  img.src = `data:${creative.type};base64,${creative.data}`;
+                }
               }
-            }
-            return true;
-          };
+              return true;
+            };
 
-          const exportFn = format === 'png' ? toPng : toJpeg;
-          const dataUrl = await exportFn(node, {
-            cacheBust: true,
-            quality: format === 'jpg' ? 0.92 : 1,
-            skipFonts: true,
-            filter
-          });
+            const exportFn = format === 'png' ? toPng : toJpeg;
+            const dataUrl = await exportFn(node, {
+              cacheBust: true,
+              quality: format === 'jpg' ? 0.92 : 1,
+              skipFonts: true,
+              filter
+            });
 
-          const link = document.createElement('a');
-          link.href = dataUrl;
-          link.download = `creative-preview-${Date.now()}.${format}`;
-          link.click();
-          showToast(`Preview exported as ${format.toUpperCase()}`, 'success');
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = `creative-preview-${Date.now()}.${format}`;
+            link.click();
+            showToast(`Preview exported as ${format.toUpperCase()}`, 'success');
+          } finally {
+            // Restore normal state
+            set(state => ({
+              preview: { ...state.preview, forceExpandText: false }
+            }));
+          }
         }
       }),
       {

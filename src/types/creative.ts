@@ -47,6 +47,7 @@ export interface PreviewSettings {
   device: Device;
   adType: AdType;
   adFormat: AdFormat;
+  forceExpandText?: boolean;
 }
 
 export interface FacebookPageData {

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Globe, Heart, MessageCircle, Share } from 'lucide-react';
+import { useCreativeStore } from '@/stores/creativeStore';
 import type { Device, AdType, AdFormat } from '@/types/creative';
 
 interface FacebookPreviewProps {
@@ -26,6 +27,9 @@ export const FacebookPreview: React.FC<FacebookPreviewProps> = ({
   adFormat,
   adData
 }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const adCopy = useCreativeStore(state => state.adCopy);
+  const forceExpandText = useCreativeStore(state => state.preview.forceExpandText);
   if (adType === 'story' || adType === 'reel') {
     return (
       <div className="bg-black rounded-lg aspect-story relative overflow-hidden">
@@ -82,11 +86,21 @@ export const FacebookPreview: React.FC<FacebookPreviewProps> = ({
       {adData.primaryText && (
         <div className="px-3 pb-2">
           <p className="text-sm text-text-primary">
-            {adData.primaryText.length > 125
-              ? `${adData.primaryText.substring(0, 125)}... `
-              : adData.primaryText}
-            {adData.primaryText.length > 125 && (
-              <span className="text-meta-blue font-medium cursor-pointer">See more</span>
+            {(isExpanded || forceExpandText) ? adCopy.primaryText : (
+              <>
+                {adData.primaryText.length > 125
+                  ? `${adData.primaryText.substring(0, 125)}... `
+                  : adData.primaryText}
+                {adData.primaryText.length > 125 && (
+                  <button
+                    type="button"
+                    onClick={() => setIsExpanded(true)}
+                    className="text-meta-blue font-medium cursor-pointer hover:underline"
+                  >
+                    See more
+                  </button>
+                )}
+              </>
             )}
           </p>
         </div>

@@ -26,7 +26,7 @@ export const AdvertiserInfoStep: React.FC = () => {
 
   const hasAttemptedVerification = facebook.hasAttempted ?? Boolean(facebook.pageData);
   const advertiserFieldsDisabled = facebook.verificationStatus === 'pending' || !hasAttemptedVerification;
-  const isGenerateDisabled = !hasAttemptedVerification || !websiteUrl || !companyOverview || aiState.isGenerating;
+  const isGenerateDisabled = !hasAttemptedVerification || !websiteUrl || !companyOverview || !campaignObjective || aiState.isGenerating;
   const pageData = facebook.pageData;
   const pageCategory = useMemo(() => (pageData?.categories ? pageData.categories.join(', ') : ''), [pageData?.categories]);
   const instagramHandle = useMemo(() => {
@@ -41,6 +41,10 @@ export const AdvertiserInfoStep: React.FC = () => {
   };
 
   const handleGenerateAdCopy = async () => {
+    if (!campaignObjective) {
+      showToast('Campaign Objective is required', 'error');
+      return;
+    }
     await generateAdCopy();
   };
 
@@ -141,7 +145,7 @@ export const AdvertiserInfoStep: React.FC = () => {
 
             <div className="space-y-2">
               <label className="flex items-center justify-between text-12 text-text-muted font-medium">
-                <span>Campaign Objective</span>
+                <span>Campaign Objective <span className="text-danger">*</span></span>
                 <span className="text-11 text-text-muted">{campaignObjective.length}/300</span>
               </label>
               <textarea
@@ -150,6 +154,7 @@ export const AdvertiserInfoStep: React.FC = () => {
                 placeholder="What are your marketing goals for this campaign?"
                 className="form-textarea h-20"
                 maxLength={300}
+                required
                 disabled={advertiserFieldsDisabled}
               />
             </div>

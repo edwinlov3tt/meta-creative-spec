@@ -88,6 +88,18 @@ export const InstagramPreview: React.FC<InstagramPreviewProps> = ({
         </div>
       </div>
 
+      <div className="px-3 py-2 border-b border-divider">
+        <a
+          href={adData.websiteUrl || '#'}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-between w-full px-4 py-2.5 bg-white border border-surface-300 rounded-md text-sm font-medium text-text-primary hover:bg-surface-50"
+        >
+          <span>{adData.callToAction}</span>
+          <ChevronRight className="w-4 h-4" />
+        </a>
+      </div>
+
       <div className="p-3">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-4">
@@ -104,16 +116,6 @@ export const InstagramPreview: React.FC<InstagramPreviewProps> = ({
           <span className="font-medium">@{adData.brandName.toLowerCase()}</span>
           <span className="ml-1">{adData.primaryText}</span>
         </div>
-
-        <a
-          href={adData.websiteUrl || '#'}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-between w-full px-4 py-2.5 bg-white border border-surface-300 rounded-md text-sm font-medium text-text-primary hover:bg-surface-50 mb-3"
-        >
-          <span>{adData.callToAction}</span>
-          <ChevronRight className="w-4 h-4" />
-        </a>
 
         <p className="text-sm text-text-muted">View all 12 comments</p>
         <p className="text-xs text-text-muted mt-1">2 hours ago</p>

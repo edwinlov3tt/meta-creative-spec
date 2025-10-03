@@ -14,17 +14,25 @@ export class ExcelExportService {
    */
   private async loadTemplate(): Promise<ExcelJS.Workbook> {
     try {
+      console.log('Loading Excel template from:', this.templatePath);
       const response = await fetch(this.templatePath);
+
       if (!response.ok) {
-        throw new Error(`Failed to load template: ${response.statusText}`);
+        console.error('Template fetch failed:', response.status, response.statusText);
+        throw new Error(`Failed to load template: ${response.status} ${response.statusText}`);
       }
 
+      console.log('Template fetched, loading into ExcelJS...');
       const arrayBuffer = await response.arrayBuffer();
+      console.log('ArrayBuffer size:', arrayBuffer.byteLength);
+
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
 
+      console.log('Excel template loaded successfully');
       return workbook;
     } catch (error) {
+      console.error('Template load error details:', error);
       throw new ExportErrorException({
         code: 'TEMPLATE_LOAD_ERROR',
         message: 'Failed to load Excel template',
@@ -79,30 +87,44 @@ export class ExcelExportService {
    */
   async generateExcel(spec: SpecExport, facebookUrl?: string): Promise<Buffer> {
     try {
+      console.log('Starting Excel generation...');
+
       // Load template
       const workbook = await this.loadTemplate();
 
       // Get the spec sheet (try multiple possible names)
+      console.log('Looking for worksheet:', EXCEL_SHEET_NAME);
       let specSheet = workbook.getWorksheet(EXCEL_SHEET_NAME);
 
       // If not found, try the first sheet
       if (!specSheet) {
+        console.log('Sheet not found by name, trying first worksheet...');
         specSheet = workbook.worksheets[0];
+        console.log('First worksheet name:', specSheet?.name);
       }
 
       if (!specSheet) {
         throw new Error('Could not find worksheet in template');
       }
 
+      console.log('Mapping spec data to cells...');
       // Map and apply data
       const specData = this.mapSpecData(spec, facebookUrl);
+      console.log('Spec data mapped:', Object.keys(specData));
+
       this.applyDataToSheet(specSheet, specData);
+      console.log('Data applied to worksheet');
 
       // Generate Excel buffer
+      console.log('Generating Excel buffer...');
       const buffer = await workbook.xlsx.writeBuffer();
+      console.log('Excel buffer generated, size:', buffer.byteLength);
+
       return Buffer.from(buffer);
 
     } catch (error) {
+      console.error('Excel generation error:', error);
+
       if (error instanceof ExportErrorException) {
         throw error;
       }

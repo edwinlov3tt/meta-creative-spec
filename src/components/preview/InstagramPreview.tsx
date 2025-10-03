@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, MessageCircle, Send, Bookmark } from 'lucide-react';
+import { Heart, MessageCircle, Send, Bookmark, ChevronRight } from 'lucide-react';
 import type { Device, AdType, AdFormat } from '@/types/creative';
 
 interface InstagramPreviewProps {
@@ -100,23 +100,22 @@ export const InstagramPreview: React.FC<InstagramPreviewProps> = ({
 
         <p className="text-sm font-medium text-text-primary mb-2">234 likes</p>
 
-        <div className="text-sm text-text-primary">
+        <div className="text-sm text-text-primary mb-3">
           <span className="font-medium">@{adData.brandName.toLowerCase()}</span>
           <span className="ml-1">{adData.primaryText}</span>
         </div>
 
-        <div className="mt-3">
-          <a
-            href={adData.websiteUrl || '#'}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-instagram text-white px-4 py-2 rounded-md text-sm font-medium w-full block text-center"
-          >
-            {adData.callToAction}
-          </a>
-        </div>
+        <a
+          href={adData.websiteUrl || '#'}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-between w-full px-4 py-2.5 bg-white border border-surface-300 rounded-md text-sm font-medium text-text-primary hover:bg-surface-50 mb-3"
+        >
+          <span>{adData.callToAction}</span>
+          <ChevronRight className="w-4 h-4" />
+        </a>
 
-        <p className="text-sm text-text-muted mt-2">View all 12 comments</p>
+        <p className="text-sm text-text-muted">View all 12 comments</p>
         <p className="text-xs text-text-muted mt-1">2 hours ago</p>
       </div>
     </div>

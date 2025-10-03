@@ -44,7 +44,7 @@ export const AdPreview: React.FC = () => {
   return (
     <div
       ref={previewRef}
-      className="bg-white border border-border rounded-card shadow-1 flex flex-col max-h-[calc(100vh-7rem)]"
+      className="bg-white border border-border rounded-card shadow-1 flex flex-col h-auto"
     >
       <div className="p-5 border-b border-divider">
         <div className="flex items-center justify-between">

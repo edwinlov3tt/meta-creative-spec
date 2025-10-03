@@ -1,4 +1,5 @@
-const API_BASE_URL = (import.meta.env.VITE_API_URL ?? '').trim();
+// Use relative paths in production (Vercel), localhost in development
+const API_BASE_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL ?? '').trim();
 
 class ApiError extends Error {
   constructor(public status: number, message: string, public details?: unknown) {
@@ -63,6 +64,7 @@ export interface GenerateAdCopyPayload {
   instructions?: string;
   customPrompt?: string;
   includeEmoji?: boolean;
+  creativeDescription?: string;
   facebookPageData?: unknown;
   creativeData?: {
     type: string;
@@ -81,6 +83,8 @@ export interface GeneratedAdCopyResponse {
     adName: string;
     reasoning?: string;
   };
+  method?: string;
+  error?: string;
 }
 
 export interface FacebookVerificationRequest {
@@ -92,19 +96,20 @@ export interface FacebookVerificationResponse {
   success: boolean;
   data: unknown;
   method?: string;
+  errors?: string[];
   error?: string;
 }
 
 export const api = {
   generateAdCopy(payload: GenerateAdCopyPayload) {
-    return request<GeneratedAdCopyResponse>('/api/generate-copy.php', {
+    return request<GeneratedAdCopyResponse>('/api/generate-copy', {
       method: 'POST',
       body: JSON.stringify(payload)
     });
   },
 
   verifyFacebookPage(payload: FacebookVerificationRequest) {
-    return request<FacebookVerificationResponse>('/api/facebook-page.php', {
+    return request<FacebookVerificationResponse>('/api/facebook-page', {
       method: 'POST',
       body: JSON.stringify(payload)
     });

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 import { useCreativeStore } from '@/stores/creativeStore';
 import type { AdFormat, AdType, Device, Platform } from '@/types/creative';
 
@@ -14,6 +14,7 @@ export const useCreativePreviewData = () => {
   const adCopy = useCreativeStore(state => state.adCopy);
   const brief = useCreativeStore(state => state.brief);
   const facebook = useCreativeStore(state => state.facebook);
+  const blobUrlRef = useRef<string>('');
 
   const truncatedPrimary = useMemo(
     () => applySeeMore(adCopy.primaryText || '', brief.removeCharacterLimit),
@@ -43,8 +44,50 @@ export const useCreativePreviewData = () => {
   }, [facebook.pageData]);
 
   const creativeImage = useMemo(() => {
-    return brief.creativeFile?.data || '';
+    const fileData = brief.creativeFile?.data;
+    if (!fileData) return '';
+
+    // If it's already a blob URL or regular URL, return as-is
+    if (fileData.startsWith('blob:') || fileData.startsWith('http')) {
+      return fileData;
+    }
+
+    // Convert base64 to Blob URL to avoid 431 error
+    try {
+      // Revoke previous blob URL if exists
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+      }
+
+      const base64Data = fileData.split(',')[1];
+      const mimeType = fileData.split(',')[0].split(':')[1].split(';')[0];
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: mimeType });
+      const blobUrl = URL.createObjectURL(blob);
+      blobUrlRef.current = blobUrl;
+
+      return blobUrl;
+    } catch (error) {
+      console.error('Failed to create blob URL:', error);
+      return '';
+    }
   }, [brief.creativeFile]);
+
+  // Cleanup blob URL on unmount
+  useEffect(() => {
+    return () => {
+      if (blobUrlRef.current) {
+        URL.revokeObjectURL(blobUrlRef.current);
+      }
+    };
+  }, []);
 
   const adData = useMemo(() => ({
     adName: adCopy.adName,

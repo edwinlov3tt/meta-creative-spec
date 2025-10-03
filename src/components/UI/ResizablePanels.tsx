@@ -66,7 +66,7 @@ export const ResizablePanels: React.FC<ResizablePanelsProps> = ({
       className={`flex h-full ${className}`}
     >
       <div
-        className="min-w-0 border-r border-surface-200 bg-white"
+        className="min-w-0 border-r border-surface-200 bg-white overflow-y-auto"
         style={{ width: `${leftWidth}%` }}
       >
         {leftPanel}
@@ -87,7 +87,7 @@ export const ResizablePanels: React.FC<ResizablePanelsProps> = ({
       </div>
 
       <div
-        className="min-w-0 bg-surface-50 overflow-y-auto"
+        className="min-w-0 bg-surface-50 overflow-hidden"
         style={{ width: `${rightWidth}%` }}
       >
         {rightPanel}

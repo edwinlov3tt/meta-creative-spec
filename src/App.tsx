@@ -25,14 +25,12 @@ function App() {
           minLeftWidth={35}
           maxLeftWidth={70}
           leftPanel={
-            <div className="h-full overflow-y-auto bg-white">
-              <div className="max-w-3xl mx-auto p-6 space-y-sp-6">
-                <FormBuilder />
-              </div>
+            <div className="max-w-3xl mx-auto p-6 space-y-sp-6">
+              <FormBuilder />
             </div>
           }
           rightPanel={
-            <div className="sticky top-0 bg-surface-50 flex items-center justify-center min-h-screen">
+            <div className="h-full bg-surface-50 flex items-center justify-center">
               <div className="w-full max-w-md px-4 py-6">
                 <AdPreview />
               </div>

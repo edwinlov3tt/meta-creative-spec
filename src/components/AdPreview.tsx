@@ -64,7 +64,7 @@ export const AdPreview: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowControls(prev => !prev)}
-            className="inline-flex items-center gap-1 text-12 font-medium text-text-muted hover:text-text-primary"
+            className="inline-flex items-center gap-1 text-12 font-medium text-text-muted hover:text-text-primary ml-auto"
           >
             <span>Settings</span>
             <ChevronDown className={`w-4 h-4 transition-transform ${showControls ? 'rotate-180' : ''}`} />

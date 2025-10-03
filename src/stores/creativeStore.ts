@@ -675,41 +675,109 @@ export const useCreativeStore = create<CreativeStore>()(
           try {
             const zip = new JSZip();
             const spec = get().exportSpec();
+            const timestamp = Date.now();
 
-            // Generate Excel spec sheet
-            const excelService = new ExcelExportService();
-            const excelBuffer = await excelService.generateExcel(spec, spec.facebookPageUrl);
-            const excelFilename = excelService.generateFilename(spec.refName || 'creative-spec', false);
-
-            // Add files to ZIP
+            // 1. Add JSON spec
             zip.file('creative-spec.json', JSON.stringify(spec, null, 2));
-            zip.file(excelFilename, excelBuffer);
 
-            const pngDataUrl = await toPng(node, { cacheBust: true });
-            const jpgDataUrl = await toJpeg(node, { cacheBust: true, quality: 0.92 });
-
-            zip.file('preview/preview.png', dataUrlToUint8Array(pngDataUrl));
-            zip.file('preview/preview.jpg', dataUrlToUint8Array(jpgDataUrl));
-
-            const creative = get().brief.creativeFile;
-            if (creative?.data) {
-              const bytes = base64ToUint8Array(creative.data);
-              zip.file(`creative/${creative.name}`, bytes);
+            // 2. Generate and add Excel spec sheet
+            try {
+              const excelService = new ExcelExportService();
+              const excelBuffer = await excelService.generateExcel(spec, spec.facebookPageUrl);
+              const excelFilename = excelService.generateFilename(spec.refName || 'creative-spec', false);
+              zip.file(excelFilename, excelBuffer);
+            } catch (error) {
+              console.error('Failed to generate Excel file', error);
+              showToast('Warning: Excel file skipped', 'warning');
             }
 
-            const bundle = await zip.generateAsync({ type: 'blob' });
+            // 3. Add text-based spec sheet for easy reading
+            const trackedUrl = spec.destinationUrl || spec.facebookPageUrl || '';
+            const textSpec = generateSpecSheet(spec, trackedUrl);
+            zip.file('creative-spec.txt', textSpec);
+
+            // 4. Add preview screenshots (PNG and JPG)
+            try {
+              const pngDataUrl = await toPng(node, { cacheBust: true, pixelRatio: 2 });
+              const jpgDataUrl = await toJpeg(node, { cacheBust: true, quality: 0.95, pixelRatio: 2 });
+
+              zip.file('previews/preview.png', dataUrlToUint8Array(pngDataUrl));
+              zip.file('previews/preview.jpg', dataUrlToUint8Array(jpgDataUrl));
+            } catch (error) {
+              console.error('Failed to generate preview screenshots', error);
+              showToast('Warning: Preview screenshots skipped', 'warning');
+            }
+
+            // 5. Add original creative file
+            const creative = get().brief.creativeFile;
+            if (creative?.data && creative?.name) {
+              try {
+                const bytes = base64ToUint8Array(creative.data);
+                const ext = creative.name.split('.').pop()?.toLowerCase();
+
+                // Add original
+                zip.file(`creatives/original/${creative.name}`, bytes);
+
+                // Add copies in standard formats for easy use
+                if (ext === 'png' || ext === 'jpg' || ext === 'jpeg' || ext === 'webp') {
+                  zip.file(`creatives/1080x1080-feed.${ext}`, bytes);
+                  zip.file(`creatives/1080x1350-story.${ext}`, bytes);
+                }
+              } catch (error) {
+                console.error('Failed to add creative file', error);
+                showToast('Warning: Creative file skipped', 'warning');
+              }
+            }
+
+            // 6. Add README
+            const readme = `Meta Creative Bundle
+====================
+
+This bundle contains all assets for: ${spec.refName || 'Untitled Creative'}
+Generated: ${new Date(timestamp).toLocaleString()}
+
+Contents:
+---------
+• creative-spec.json - Machine-readable spec data
+• creative-spec.xlsx - Excel spec sheet with Meta template
+• creative-spec.txt - Human-readable spec sheet
+• previews/ - Ad preview screenshots (PNG and JPG)
+• creatives/ - Original creative files and formatted copies
+
+Usage:
+------
+1. Share the Excel file with your buying team
+2. Upload creatives from the creatives/ folder to Meta Ads Manager
+3. Use the spec data to configure your ad campaign
+4. Reference preview screenshots for approval workflows
+
+Platform: ${spec.platform || 'Facebook/Instagram'}
+Ad Type: Feed, Story, Reel compatible
+Dimensions: Multiple formats included
+`;
+            zip.file('README.txt', readme);
+
+            // Generate and download the bundle
+            const bundle = await zip.generateAsync({
+              type: 'blob',
+              compression: 'DEFLATE',
+              compressionOptions: { level: 6 }
+            });
+
             const url = URL.createObjectURL(bundle);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${spec.refName || 'creative-spec'}-${Date.now()}.zip`;
+            a.download = `${slugify(spec.refName || 'creative-spec')}-bundle-${timestamp}.zip`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            showToast('Creative bundle downloaded', 'success');
+
+            showToast('Creative bundle downloaded successfully', 'success');
           } catch (error) {
             console.error('Failed to export bundle', error);
-            showToast('Failed to export bundle', 'error');
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            showToast(`Failed to export bundle: ${errorMessage}`, 'error');
           }
         },
 

@@ -667,7 +667,7 @@ async function generateAdCopy(isRegenerate = false) {
       }
     }
     
-    const response = await fetch('./api/generate-copy.php', {
+    const response = await fetch('./api/generate-copy', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

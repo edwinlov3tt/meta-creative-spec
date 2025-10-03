@@ -64,6 +64,30 @@ const deriveFacebookFallback = (facebookUrl: string): FacebookPageData | null =>
   } as FacebookPageData;
 };
 
+const humanizeMethod = (method?: string) => {
+  if (!method) return undefined;
+  return method
+    .split(/[_\s-]+/)
+    .filter(Boolean)
+    .map(segment => `${segment.charAt(0).toUpperCase()}${segment.slice(1)}`)
+    .join(' ');
+};
+
+const labelFacebookMethod = (method?: string) => {
+  if (!method) return undefined;
+  const normalized = method.toLowerCase();
+  if (normalized === 'worker_api' || normalized === 'worker') {
+    return 'Meta Worker';
+  }
+  if (normalized === 'url_fallback') {
+    return 'URL Fallback';
+  }
+  if (normalized === 'domain_fallback') {
+    return 'Domain Fallback';
+  }
+  return humanizeMethod(method);
+};
+
 const base64ToUint8Array = (base64: string) => {
   const binary = atob(base64);
   const len = binary.length;
@@ -156,6 +180,7 @@ const defaultPreview = (): PreviewSettings => ({
 const defaultFacebookState = (): FacebookState => ({
   pageData: null,
   verificationStatus: 'idle',
+  hasAttempted: false,
   error: null
 });
 
@@ -238,6 +263,7 @@ export const useCreativeStore = create<CreativeStore>()(
               ...state.facebook,
               pageData: data,
               verificationStatus: data ? 'success' : 'idle',
+              hasAttempted: Boolean(data),
               error: null
             },
             brief: {
@@ -384,7 +410,8 @@ export const useCreativeStore = create<CreativeStore>()(
         },
 
         verifyFacebookPage: async (facebookUrl, websiteUrl) => {
-          if (!facebookUrl) {
+          const inputUrl = facebookUrl.trim();
+          if (!inputUrl) {
             set(state => ({
               facebook: {
                 ...state.facebook,
@@ -395,65 +422,94 @@ export const useCreativeStore = create<CreativeStore>()(
             return;
           }
 
+          const resolvedFacebookUrl = ensureHttps(inputUrl);
+
           set(state => ({
             facebook: {
               ...state.facebook,
               verificationStatus: 'pending',
+              hasAttempted: true,
               error: null
             }
           }));
 
-          try {
-            const response = await api.verifyFacebookPage({
-              facebookUrl,
-              websiteUrl: websiteUrl || get().brief.websiteUrl
-            });
-            const pageData = (response.data ?? null) as FacebookPageData | null;
+          const commitFacebookSuccess = (pageData: FacebookPageData | null, methodLabel?: string) => {
             set(state => ({
               facebook: {
                 ...state.facebook,
                 pageData,
                 verificationStatus: 'success',
+                hasAttempted: true,
                 error: null
               },
               brief: {
                 ...state.brief,
+                facebookLink: resolvedFacebookUrl,
                 companyOverview:
                   state.brief.companyOverview || pageData?.intro || state.brief.companyOverview,
                 websiteUrl:
-                  state.brief.websiteUrl || (pageData?.website ? ensureHttps(pageData.website) : state.brief.websiteUrl)
+                  state.brief.websiteUrl ||
+                  (pageData?.website ? ensureHttps(pageData.website) : state.brief.websiteUrl)
               },
               isDirty: true
             }));
-            showToast('Facebook page verified', 'success');
+            const suffix = methodLabel ? ` (${methodLabel})` : '';
+            showToast(`Facebook page verified${suffix}`, 'success');
+          };
+
+          try {
+            const response = await api.verifyFacebookPage({
+              facebookUrl: resolvedFacebookUrl,
+              websiteUrl: websiteUrl || get().brief.websiteUrl
+            });
+            const pageData = (response.data ?? null) as FacebookPageData | null;
+            const methodLabel = labelFacebookMethod(response.method);
+            if (Array.isArray(response.errors) && response.errors.length > 0) {
+              console.warn('Facebook verification warnings', {
+                facebookUrl: resolvedFacebookUrl,
+                warnings: response.errors
+              });
+            }
+            commitFacebookSuccess(pageData, methodLabel);
+            return;
           } catch (error) {
             if (error instanceof ApiError && error.status === 0) {
-              const fallbackData = deriveFacebookFallback(facebookUrl);
+              const fallbackData = deriveFacebookFallback(resolvedFacebookUrl);
               if (fallbackData) {
                 set(state => ({
                   facebook: {
                     ...state.facebook,
                     pageData: fallbackData,
                     verificationStatus: 'success',
+                    hasAttempted: true,
                     error: null
                   },
                   brief: {
                     ...state.brief,
-                    facebookLink: ensureHttps(facebookUrl)
+                    facebookLink: resolvedFacebookUrl
                   },
                   isDirty: true
                 }));
                 const baseHint = CREATIVE_API_BASE ? ` (${CREATIVE_API_BASE})` : '';
+                console.warn('Using client-side Facebook fallback', {
+                  facebookUrl: resolvedFacebookUrl
+                });
                 showToast(`API offline${baseHint}. Using basic info from URL.`, 'warning');
                 return;
               }
             }
+
+            console.error('Facebook verification failed', {
+              facebookUrl: resolvedFacebookUrl,
+              error
+            });
 
             const message = error instanceof ApiError ? error.message : 'Unable to verify Facebook page';
             set(state => ({
               facebook: {
                 ...state.facebook,
                 verificationStatus: 'error',
+                hasAttempted: true,
                 error: message
               }
             }));
@@ -504,6 +560,7 @@ export const useCreativeStore = create<CreativeStore>()(
             };
 
             const response = await api.generateAdCopy(payload);
+            const methodLabel = response.method ? `AI — ${humanizeMethod(response.method)}` : undefined;
 
             set(state => ({
               adCopy: {
@@ -524,7 +581,11 @@ export const useCreativeStore = create<CreativeStore>()(
               },
               isDirty: true
             }));
-            showToast(previouslyGenerated ? 'Ad copy regenerated' : 'Ad copy generated', 'success');
+            const toastSuffix = methodLabel ? ` (${methodLabel})` : '';
+            showToast(
+              previouslyGenerated ? `Ad copy regenerated${toastSuffix}` : `Ad copy generated${toastSuffix}`,
+              'success'
+            );
             get().applyTrackedUrl();
           } catch (error) {
             const message = error instanceof ApiError ? error.message : 'Unable to generate ad copy';

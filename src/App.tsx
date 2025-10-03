@@ -32,8 +32,8 @@ function App() {
             </div>
           }
           rightPanel={
-            <div className="h-screen sticky top-0 bg-surface-50 flex items-center justify-center">
-              <div className="w-full max-w-md px-4">
+            <div className="sticky top-0 bg-surface-50 flex items-center justify-center min-h-screen">
+              <div className="w-full max-w-md px-4 py-6">
                 <AdPreview />
               </div>
             </div>

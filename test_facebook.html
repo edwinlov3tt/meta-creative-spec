@@ -78,7 +78,7 @@
             const websiteUrl = document.getElementById('website-url').value;
             
             try {
-                const response = await fetch('./api/facebook-page.php', {
+                const response = await fetch('./api/facebook-page', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 

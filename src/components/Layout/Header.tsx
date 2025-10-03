@@ -92,7 +92,7 @@ export const Header: React.FC = () => {
               </Button>
               {exportMenuOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-56 rounded-card border border-border bg-white shadow-lg text-12 text-text-primary py-2"
+                  className="absolute right-0 mt-2 w-56 rounded-card border border-border bg-white shadow-lg text-12 text-text-primary py-2 z-50"
                   onMouseLeave={() => setExportMenuOpen(false)}
                 >
                   <button

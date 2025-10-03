@@ -42,6 +42,12 @@
     @apply form-input cursor-pointer;
   }
 
+  .form-input:disabled,
+  .form-textarea:disabled,
+  .form-select:disabled {
+    @apply bg-surface-50 border-surface-200 text-surface-400 placeholder:text-surface-400;
+  }
+
   .btn-primary {
     @apply px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-200;
   }

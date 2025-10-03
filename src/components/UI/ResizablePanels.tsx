@@ -87,7 +87,7 @@ export const ResizablePanels: React.FC<ResizablePanelsProps> = ({
       </div>
 
       <div
-        className="min-w-0 bg-surface-50 overflow-hidden"
+        className="min-w-0 bg-surface-50 overflow-y-auto"
         style={{ width: `${rightWidth}%` }}
       >
         {rightPanel}

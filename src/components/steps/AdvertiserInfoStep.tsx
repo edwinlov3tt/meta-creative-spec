@@ -3,6 +3,7 @@ import { ChevronDown, ChevronRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/UI/Button';
 import { useCreativeStore } from '@/stores/creativeStore';
 import { showToast } from '@/stores/toastStore';
+import { cn } from '@/utils/cn';
 
 export const AdvertiserInfoStep: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -23,8 +24,9 @@ export const AdvertiserInfoStep: React.FC = () => {
   const creativeFile = useCreativeStore(state => state.brief.creativeFile);
   const processCreativeUpload = useCreativeStore(state => state.processCreativeUpload);
 
-  const isGenerateDisabled = !websiteUrl || !companyOverview || aiState.isGenerating;
-  const advertiserFieldsDisabled = facebook.verificationStatus !== 'success';
+  const hasAttemptedVerification = facebook.hasAttempted ?? Boolean(facebook.pageData);
+  const advertiserFieldsDisabled = facebook.verificationStatus === 'pending' || !hasAttemptedVerification;
+  const isGenerateDisabled = !hasAttemptedVerification || !websiteUrl || !companyOverview || aiState.isGenerating;
   const pageData = facebook.pageData;
   const pageCategory = useMemo(() => (pageData?.categories ? pageData.categories.join(', ') : ''), [pageData?.categories]);
   const instagramHandle = useMemo(() => {
@@ -75,19 +77,20 @@ export const AdvertiserInfoStep: React.FC = () => {
         <div className="px-6 pb-6 space-y-sp-4">
           <div className="space-y-2">
             <label className="text-12 text-text-muted font-medium">Advertiser Facebook Link</label>
-            <div className="flex gap-2">
+            <div className="relative">
               <input
                 type="url"
                 value={facebookLink}
                 onChange={(e) => updateBriefField('facebookLink', e.target.value)}
                 placeholder="https://facebook.com/brand"
-                className="form-input flex-1"
+                className="form-input pr-28"
               />
               <Button
                 variant={facebook.verificationStatus === 'success' ? 'secondary' : 'outline'}
                 size="sm"
                 onClick={() => { void handleFacebookButtonClick(); }}
                 disabled={facebook.verificationStatus === 'pending' || !facebookLink}
+                className="absolute top-1/2 right-1 h-[34px] -translate-y-1/2 px-4"
               >
                 {facebook.verificationStatus === 'pending'
                   ? 'Verifying…'
@@ -99,168 +102,173 @@ export const AdvertiserInfoStep: React.FC = () => {
             {facebook.error && (
               <p className="text-11 text-danger">{facebook.error}</p>
             )}
+            {!hasAttemptedVerification && !facebook.error && (
+              <p className="text-11 text-text-muted">Verify your Facebook link to unlock the advertiser fields.</p>
+            )}
           </div>
 
-          <div className="space-y-2">
-            <label className="text-12 text-text-muted font-medium">
-              Website / CTA URL <span className="text-danger">*</span>
-            </label>
-            <input
-              type="url"
-              value={websiteUrl}
-              onChange={(e) => updateBriefField('websiteUrl', e.target.value)}
-              placeholder="https://example.com"
-              className="form-input"
-              required
-              disabled={advertiserFieldsDisabled}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="flex items-center justify-between text-12 text-text-muted font-medium">
-              <span>Company Overview <span className="text-danger">*</span></span>
-              <span className="text-11 text-text-muted">{companyOverview.length}/500</span>
-            </label>
-            <textarea
-              value={companyOverview}
-              onChange={(e) => updateBriefField('companyOverview', e.target.value.slice(0, 500))}
-              placeholder="Describe your company, products, and target audience..."
-              className="form-textarea h-24"
-              maxLength={500}
-              required
-              disabled={advertiserFieldsDisabled}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="flex items-center justify-between text-12 text-text-muted font-medium">
-              <span>Campaign Objective</span>
-              <span className="text-11 text-text-muted">{campaignObjective.length}/300</span>
-            </label>
-            <textarea
-              value={campaignObjective}
-              onChange={(e) => updateBriefField('campaignObjective', e.target.value.slice(0, 300))}
-              placeholder="What are your marketing goals for this campaign?"
-              className="form-textarea h-20"
-              maxLength={300}
-              disabled={advertiserFieldsDisabled}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-12 text-text-muted font-medium">Creative Upload</label>
-            <div className="flex items-center gap-3">
+          <div className={cn('space-y-sp-4', advertiserFieldsDisabled ? 'opacity-60 transition-opacity' : 'transition-opacity')}>
+            <div className="space-y-2">
+              <label className="text-12 text-text-muted font-medium">
+                Website / CTA URL <span className="text-danger">*</span>
+              </label>
               <input
-                type="file"
-                accept="image/png,image/jpeg,image/jpg,image/webp"
-                onChange={(event) => {
-                  const file = event.target.files?.[0] || null;
-                  void processCreativeUpload(file);
-                }}
+                type="url"
+                value={websiteUrl}
+                onChange={(e) => updateBriefField('websiteUrl', e.target.value)}
+                placeholder="https://example.com"
+                className="form-input"
+                required
                 disabled={advertiserFieldsDisabled}
               />
-              {creativeFile?.name && (
-                <span className="text-12 text-text-muted truncate max-w-[12rem]" title={creativeFile.name}>
-                  {creativeFile.name}
-                </span>
-              )}
-              {creativeFile && (
-                <button
-                  type="button"
-                  className="text-11 text-link underline"
-                  onClick={() => { void processCreativeUpload(null); }}
-                  disabled={advertiserFieldsDisabled}
-                >
-                  Remove
-                </button>
-              )}
             </div>
-          </div>
 
-          <div className="border border-border rounded-card">
-            <button
-              type="button"
-              className="w-full flex items-center justify-between px-4 py-3 text-left text-12 font-semibold text-text-primary"
-              onClick={() => setShowAdditional(prev => !prev)}
-            >
-              <span>Additional Settings</span>
-              <ChevronDown className={`w-4 h-4 transition-transform ${showAdditional ? 'rotate-180' : ''}`} />
-            </button>
-            {showAdditional && (
-              <div className="px-4 pb-4 space-y-sp-3">
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-12 text-text-muted font-medium">
-                    <input
-                      type="checkbox"
-                      className="meta-checkbox"
-                      checked={includeEmoji}
-                      onChange={(e) => updateBriefField('includeEmoji', e.target.checked)}
+            <div className="space-y-2">
+              <label className="flex items-center justify-between text-12 text-text-muted font-medium">
+                <span>Company Overview <span className="text-danger">*</span></span>
+                <span className="text-11 text-text-muted">{companyOverview.length}/500</span>
+              </label>
+              <textarea
+                value={companyOverview}
+                onChange={(e) => updateBriefField('companyOverview', e.target.value.slice(0, 500))}
+                placeholder="Describe your company, products, and target audience..."
+                className="form-textarea h-24"
+                maxLength={500}
+                required
+                disabled={advertiserFieldsDisabled}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="flex items-center justify-between text-12 text-text-muted font-medium">
+                <span>Campaign Objective</span>
+                <span className="text-11 text-text-muted">{campaignObjective.length}/300</span>
+              </label>
+              <textarea
+                value={campaignObjective}
+                onChange={(e) => updateBriefField('campaignObjective', e.target.value.slice(0, 300))}
+                placeholder="What are your marketing goals for this campaign?"
+                className="form-textarea h-20"
+                maxLength={300}
+                disabled={advertiserFieldsDisabled}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-12 text-text-muted font-medium">Creative Upload</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/webp"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0] || null;
+                    void processCreativeUpload(file);
+                  }}
+                  disabled={advertiserFieldsDisabled}
+                />
+                {creativeFile?.name && (
+                  <span className="text-12 text-text-muted truncate max-w-[12rem]" title={creativeFile.name}>
+                    {creativeFile.name}
+                  </span>
+                )}
+                {creativeFile && (
+                  <button
+                    type="button"
+                    className="text-11 text-link underline"
+                    onClick={() => { void processCreativeUpload(null); }}
+                    disabled={advertiserFieldsDisabled}
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="border border-border rounded-card">
+              <button
+                type="button"
+                className="w-full flex items-center justify-between px-4 py-3 text-left text-12 font-semibold text-text-primary"
+                onClick={() => setShowAdditional(prev => !prev)}
+              >
+                <span>Additional Settings</span>
+                <ChevronDown className={`w-4 h-4 transition-transform ${showAdditional ? 'rotate-180' : ''}`} />
+              </button>
+              {showAdditional && (
+                <div className="px-4 pb-4 space-y-sp-3">
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-12 text-text-muted font-medium">
+                      <input
+                        type="checkbox"
+                        className="meta-checkbox"
+                        checked={includeEmoji}
+                        onChange={(e) => updateBriefField('includeEmoji', e.target.checked)}
+                        disabled={advertiserFieldsDisabled}
+                      />
+                      Include emoji in generated copy
+                    </label>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-12 text-text-muted font-medium">Additional Instructions</label>
+                    <textarea
+                      value={additionalInstructions}
+                      onChange={(e) => updateBriefField('additionalInstructions', e.target.value)}
+                      placeholder="Provide context, offers, or tone guidance"
+                      className="form-textarea h-16"
                       disabled={advertiserFieldsDisabled}
                     />
-                    Include emoji in generated copy
-                  </label>
-                </div>
+                  </div>
 
-                <div className="space-y-2">
-                  <label className="text-12 text-text-muted font-medium">Additional Instructions</label>
-                  <textarea
-                    value={additionalInstructions}
-                    onChange={(e) => updateBriefField('additionalInstructions', e.target.value)}
-                    placeholder="Provide context, offers, or tone guidance"
-                    className="form-textarea h-16"
-                    disabled={advertiserFieldsDisabled}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <label className="text-12 text-text-muted font-medium">Facebook Page ID</label>
-                    <input
-                      type="text"
-                      value={pageData?.page_id || ''}
-                      readOnly
-                      className="form-input bg-surface-50"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-12 text-text-muted font-medium">Page Category</label>
-                    <input
-                      type="text"
-                      value={pageCategory}
-                      readOnly
-                      className="form-input bg-surface-50"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-12 text-text-muted font-medium">Page Name</label>
-                    <input
-                      type="text"
-                      value={pageData?.name || ''}
-                      readOnly
-                      className="form-input bg-surface-50"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-12 text-text-muted font-medium">Cover Photo</label>
-                    <input
-                      type="url"
-                      value={pageData?.cover_image || ''}
-                      readOnly
-                      className="form-input bg-surface-50"
-                    />
-                  </div>
-                  <div className="space-y-2 col-span-2">
-                    <label className="text-12 text-text-muted font-medium">Instagram Handle</label>
-                    <input
-                      type="text"
-                      value={instagramHandle}
-                      readOnly
-                      className="form-input bg-surface-50"
-                    />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <label className="text-12 text-text-muted font-medium">Facebook Page ID</label>
+                      <input
+                        type="text"
+                        value={pageData?.page_id || ''}
+                        readOnly
+                        className="form-input bg-surface-50"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-12 text-text-muted font-medium">Page Category</label>
+                      <input
+                        type="text"
+                        value={pageCategory}
+                        readOnly
+                        className="form-input bg-surface-50"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-12 text-text-muted font-medium">Page Name</label>
+                      <input
+                        type="text"
+                        value={pageData?.name || ''}
+                        readOnly
+                        className="form-input bg-surface-50"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-12 text-text-muted font-medium">Cover Photo</label>
+                      <input
+                        type="url"
+                        value={pageData?.cover_image || ''}
+                        readOnly
+                        className="form-input bg-surface-50"
+                      />
+                    </div>
+                    <div className="space-y-2 col-span-2">
+                      <label className="text-12 text-text-muted font-medium">Instagram Handle</label>
+                      <input
+                        type="text"
+                        value={instagramHandle}
+                        readOnly
+                        className="form-input bg-surface-50"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           <div className="pt-2">

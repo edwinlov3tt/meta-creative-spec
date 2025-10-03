@@ -4,6 +4,7 @@ import { Button } from '@/components/UI/Button';
 import { useCreativeStore } from '@/stores/creativeStore';
 import { showToast } from '@/stores/toastStore';
 import { slugify } from '@/utils/slugify';
+import { cn } from '@/utils/cn';
 
 const PRIMARY_TEXT_LIMIT = 125;
 const HEADLINE_LIMIT = 40;
@@ -26,7 +27,7 @@ const renderCounter = (value: number, limit: number) => (
 export const AdCopyStep: React.FC = () => {
   const hasGenerated = useCreativeStore(state => state.ai.hasGenerated);
   const aiState = useCreativeStore(state => state.ai);
-  const [isExpanded, setIsExpanded] = useState(() => hasGenerated);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const adCopy = useCreativeStore(state => state.adCopy);
   const removeLimit = useCreativeStore(state => state.brief.removeCharacterLimit);
@@ -37,6 +38,7 @@ export const AdCopyStep: React.FC = () => {
   const getTrackedUrl = useCreativeStore(state => state.getTrackedUrl);
   const applyTrackedUrl = useCreativeStore(state => state.applyTrackedUrl);
   const lastAutoContent = useRef<string>('');
+  const isLocked = !hasGenerated && !aiState.isGenerating;
 
   const handlePrimaryTextChange = (value: string) => {
     if (removeLimit) {
@@ -47,10 +49,24 @@ export const AdCopyStep: React.FC = () => {
   };
 
   useEffect(() => {
-    if (hasGenerated) {
+    if (aiState.isGenerating || hasGenerated) {
       setIsExpanded(true);
     }
-  }, [hasGenerated]);
+  }, [aiState.isGenerating, hasGenerated]);
+
+  useEffect(() => {
+    if (!aiState.isGenerating && !hasGenerated) {
+      setIsExpanded(false);
+    }
+  }, [aiState.isGenerating, hasGenerated]);
+
+  const handleToggle = () => {
+    if (isLocked) {
+      showToast('Generate ad copy to unlock Step 2', 'warning');
+      return;
+    }
+    setIsExpanded(prev => !prev);
+  };
 
   useEffect(() => {
     const slug = slugify(adCopy.adName || '');
@@ -88,8 +104,9 @@ export const AdCopyStep: React.FC = () => {
     <div className="card">
       <button
         type="button"
-        className="w-full flex items-center justify-between p-6 text-left"
-        onClick={() => setIsExpanded(prev => !prev)}
+        aria-disabled={isLocked}
+        className={cn('w-full flex items-center justify-between p-6 text-left transition-opacity', isLocked ? 'opacity-60 cursor-not-allowed' : '')}
+        onClick={handleToggle}
       >
         <div className="flex items-center gap-3">
           {isExpanded ? (
@@ -98,8 +115,10 @@ export const AdCopyStep: React.FC = () => {
             <ChevronRight className="w-5 h-5 text-text-muted" />
           )}
           <div>
-            <h2 className="text-16 font-semibold text-text-primary">Step 2: Ad Copy</h2>
-            <p className="text-12 text-text-muted">Edit and customize your ad content.</p>
+            <h2 className={cn('text-16 font-semibold', isLocked ? 'text-text-muted' : 'text-text-primary')}>Step 2: Ad Copy</h2>
+            <p className="text-12 text-text-muted">
+              {isLocked ? 'Generate ad copy to unlock editing.' : 'Edit and customize your ad content.'}
+            </p>
           </div>
         </div>
       </button>

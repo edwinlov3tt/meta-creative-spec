@@ -73,6 +73,7 @@ export interface FacebookPageData {
 export interface FacebookState {
   pageData: FacebookPageData | null;
   verificationStatus: 'idle' | 'pending' | 'success' | 'error';
+  hasAttempted: boolean;
   error?: string | null;
 }
 

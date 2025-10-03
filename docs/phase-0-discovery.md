@@ -4,7 +4,7 @@
 - **Step gating & autosave**: Step 2 stays disabled until ad copy generation succeeds; field states persist via `localStorage` (`creativePreviewFields.v4`) and restore on load.
 - **Facebook page verification**: `verifyFacebookPage()` hits `https://meta.edwinlovett.com/?page=…`, locks the URL input, hydrates auxiliary read-only fields (page ID, category, Instagram link), updates preview branding/avatar, and persists the raw JSON for reuse.
 - **Advertiser field enable/disable**: URL, company overview, and objective inputs remain disabled until page verification passes; reset flow fully clears derived data (`resetFacebookVerification`).
-- **AI copy generation**: `generateAdCopy()` POSTs to `./api/generate-copy.php` with campaign context, creative base64 payload, and optional knobs (formula, custom prompt, emoji toggle); handles disabled UI state, counters, and toast messaging.
+- **AI copy generation**: `generateAdCopy()` POSTs to `/api/generate-copy` (Vercel serverless) with campaign context, creative base64 payload, and optional knobs (formula, custom prompt, emoji toggle); handles disabled UI state, counters, and toast messaging.
 - **Character limits & counters**: Live counts for post text, headline, descriptions, brief fields, with optional "Remove limit" toggle that switches truncation logic (`truncateWithSeeMore`).
 - **Preview state machine**: Platform/device/ad type/format selectors update DOM classes, auto-force mobile for Story/Reel, calculate aspect ratios, set CTA destinations with UTM builder, and center the preview with overflow shadows.
 - **Media handling**: Upload control reads image as base64 via `FileReader`, swaps preview asset, and stores metadata for AI submission.
